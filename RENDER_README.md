@@ -129,6 +129,18 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" \
   "https://temperature-visit-logger.onrender.com/admin/recent?"
 ```
 
+### Export recent logs to local timestamped JSON
+
+```bash
+ADMIN_TOKEN='replace-with-your-admin-token'
+TS=$(date +"%Y%m%d_%H%M%S")
+OUT="logs/recent_${TS}.json"
+mkdir -p logs
+curl -sS --fail-with-body -H "Authorization: Bearer $ADMIN_TOKEN" \
+  "https://temperature-visit-logger.onrender.com/admin/recent?limit=200" > "$OUT"
+echo "$OUT"
+```
+
 ### With query token
 
 ```bash

@@ -88,6 +88,18 @@ You can also pass the token with an Authorization header:
 curl -H "Authorization: Bearer replace-with-a-long-random-secret" "https://temperature-visit-logger.onrender.com/admin/recent?limit=50"
 ```
 
+To export recent logs to a local timestamped JSON file:
+
+```bash
+ADMIN_TOKEN='replace-with-a-long-random-secret'
+TS=$(date +"%Y%m%d_%H%M%S")
+OUT="logs/recent_${TS}.json"
+mkdir -p logs
+curl -sS --fail-with-body -H "Authorization: Bearer $ADMIN_TOKEN" \
+	"https://temperature-visit-logger.onrender.com/admin/recent?limit=200" > "$OUT"
+echo "$OUT"
+```
+
 ## Privacy note
 
 IP addresses are personal data in many jurisdictions. If you enable this logger publicly, you should add an appropriate privacy notice and make sure your data retention policy is intentional.
