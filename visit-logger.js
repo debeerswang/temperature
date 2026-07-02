@@ -22,6 +22,10 @@
     Object.entries(payload).map(([key, value]) => [key, value == null ? '' : String(value)]),
   ).toString();
 
+  const mobilePattern = /Mobi|Android|iPhone|iPad|iPod/i;
+  const isMobileDevice = mobilePattern.test(navigator.userAgent || '')
+    || navigator.maxTouchPoints > 1;
+
   let sent = false;
   let sending = false;
 
@@ -38,6 +42,14 @@
     }
 
     sending = true;
+
+    if (isMobileDevice) {
+      const image = new Image();
+      image.referrerPolicy = 'no-referrer';
+      image.src = `${endpoint}?${body}&transport=image&cacheBust=${Date.now()}`;
+      finish(true);
+      return;
+    }
 
     if (navigator.sendBeacon) {
       const blob = new Blob([body], { type: contentType });
