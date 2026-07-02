@@ -92,6 +92,20 @@
     cursor: pointer;
   }
   h1 { font-size: clamp(34px, 9vw, 56px); line-height: 0.95; letter-spacing: -0.06em; max-width: 560px; }
+  .designer-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
+    color: #E2E8F0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
   .subtitle { color: var(--soft); font-size: 15px; line-height: 1.55; margin-top: 14px; max-width: 610px; }
 
   .readiness-orb {
@@ -246,6 +260,7 @@
           <button type="button" class="lang-btn" id="languageToggle" aria-label="Switch to Simplified Chinese">中文</button>
         </div>
         <h1 id="heroTitle">Know the air before you move.</h1>
+        <div class="designer-badge" id="designerBadge">Designed by DW</div>
         <p class="subtitle" id="heroSubtitle">A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.</p>
       </div>
       <div class="readiness-orb" aria-live="polite">
@@ -370,6 +385,7 @@ const tempMaxLabel = document.getElementById('tempMaxLabel');
 const heatmapUnitLabel = document.getElementById('heatmapUnitLabel');
 const kickerText = document.getElementById('kickerText');
 const heroTitle = document.getElementById('heroTitle');
+const designerBadge = document.getElementById('designerBadge');
 const heroSubtitle = document.getElementById('heroSubtitle');
 const chipTexts = [...document.querySelectorAll('.chip-text')];
 const conditionsTitle = document.getElementById('conditionsTitle');
@@ -401,6 +417,7 @@ const copy = {
   en: {
     kicker: '▲ Outdoor activity comfort',
     heroTitle: 'Know the air before you move.',
+    designer: 'Designed by DW',
     heroSubtitle: 'A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.',
     chips: ['Run', 'Ride', 'Hike', 'Race day', 'Sweat check'],
     conditionsTitle: 'Set the conditions',
@@ -443,6 +460,7 @@ const copy = {
   zh: {
     kicker: '▲ 户外活动舒适度',
     heroTitle: '出发前先看空气。',
+    designer: 'DW 设计',
     heroSubtitle: '为跑步、骑行、徒步和比赛日准备的快速指南。调整温度和湿度，查看露点、体感热度，以及空气对身体负担的变化。',
     chips: ['跑步', '骑行', '徒步', '比赛日', '出汗检查'],
     conditionsTitle: '设置条件',
@@ -522,6 +540,7 @@ function applyLanguage() {
   document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
   kickerText.textContent = text.kicker;
   heroTitle.textContent = text.heroTitle;
+  designerBadge.textContent = text.designer;
   heroSubtitle.textContent = text.heroSubtitle;
   chipTexts.forEach((chip, index) => {
     chip.textContent = text.chips[index] || chip.textContent;
