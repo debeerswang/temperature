@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Outdoor Comfort">
 <meta name="theme-color" content="#08111F">
 <meta name="description" content="Outdoor comfort tool for runners, riders, hikers, and active people. Explore how temperature, humidity, dew point, and heat index affect training comfort.">
+<meta name="visit-log-endpoint" content="http://localhost:8787/api/log-visit">
 <title>Outdoor Comfort Index</title>
 <style>
   :root {
@@ -189,6 +190,15 @@
   .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #94A3B8; margin-top: 12px; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,0.05); }
   .legend-dot { width: 11px; height: 11px; border-radius: 4px; display: inline-block; }
+  .privacy-note {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: rgba(15, 23, 42, 0.72);
+  }
+  .privacy-note strong { display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #E2E8F0; margin-bottom: 6px; }
+  .privacy-note p { color: #94A3B8; font-size: 12px; line-height: 1.5; }
   .footer-note { color: #64748B; font-size: 12px; line-height: 1.55; margin-top: 18px; text-align: center; }
 
   @media (max-width: 640px) {
@@ -308,6 +318,10 @@
       <span><i class="legend-dot" style="background:#16A34A"></i>Comfortable</span>
       <span><i class="legend-dot" style="background:#F59E0B"></i>Sticky</span>
       <span><i class="legend-dot" style="background:#DC2626"></i>Oppressive</span>
+    </div>
+    <div class="privacy-note">
+      <strong>Privacy notice</strong>
+      <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
     </div>
     <p class="footer-note">Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.</p>
   </section>
@@ -478,5 +492,6 @@ update();
 tempSlider.addEventListener('input', update);
 rhSlider.addEventListener('input', update);
 </script>
+<script src="./visit-logger.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+{
+  "name": "temperature-visit-logger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal page-view logger for the Temperature GitHub Pages site",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

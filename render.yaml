@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: temperature-visit-logger
+    runtime: node
+    rootDir: logger
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 8787
+      - key: ALLOWED_ORIGINS
+        value: https://debeerswang.github.io,https://debeerswang.github.io/temperature/

@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Climate Comfort">
 <meta name="theme-color" content="#0F172A">
+<meta name="visit-log-endpoint" content="http://localhost:8787/api/log-visit">
 <title>Climate Comfort</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -67,6 +68,15 @@
   td.highlight { font-weight: 800; border-color: #F8FAFC; }
   .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 10px; color: #64748B; margin-bottom: 8px; }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+  .privacy-note {
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 18px;
+    background: rgba(15, 23, 42, 0.7);
+  }
+  .privacy-note strong { display: block; font-size: 11px; color: #E2E8F0; margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .privacy-note p { font-size: 11px; color: #94A3B8; line-height: 1.5; }
   .footer-note { font-size: 11px; color: #475569; margin-top: 24px; line-height: 1.5; }
 </style>
 </head>
@@ -134,6 +144,11 @@
     <span><span class="legend-dot" style="background:#065F46"></span>Comfortable</span>
     <span><span class="legend-dot" style="background:#92400E"></span>Noticeable</span>
     <span><span class="legend-dot" style="background:#991B1B"></span>Oppressive</span>
+  </div>
+
+  <div class="privacy-note">
+    <strong>Privacy notice</strong>
+    <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
   </div>
 
   <p class="footer-note">Dew point = absolute moisture in air. RH is relative to temperature — same RH at different temps means different comfort. Your body responds to dew point.</p>
@@ -263,5 +278,6 @@ update();
 tempSlider.addEventListener('input', update);
 rhSlider.addEventListener('input', update);
 </script>
+<script src="./docs/visit-logger.js" defer></script>
 </body>
 </html>
