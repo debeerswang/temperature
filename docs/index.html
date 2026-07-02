@@ -2,511 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Outdoor Comfort">
-<meta name="theme-color" content="#08111F">
+<meta name="theme-color" content="#07111f">
 <meta name="description" content="Outdoor comfort tool for runners, riders, hikers, and active people. Explore how temperature, humidity, dew point, and heat index affect training comfort.">
-<meta name="visit-log-endpoint" content="https://temperature-visit-logger.onrender.com/api/log-visit">
 <title>Outdoor Comfort Index</title>
 <style>
-  :root {
-    --bg: #08111F;
-    --panel: rgba(15, 23, 42, 0.76);
-    --panel-strong: rgba(15, 23, 42, 0.92);
-    --line: rgba(148, 163, 184, 0.18);
-    --muted: #94A3B8;
-    --text: #F8FAFC;
-    --soft: #CBD5E1;
-    --accent: #22C55E;
-    --accent-soft: rgba(34, 197, 94, 0.16);
-    --amber: #F59E0B;
-    --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    color: var(--text);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background:
-      radial-gradient(circle at 10% 5%, rgba(14, 165, 233, 0.26), transparent 32%),
-      radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.20), transparent 30%),
-      linear-gradient(180deg, #08111F 0%, #0F172A 48%, #111827 100%);
-    padding: 0;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(140deg, rgba(255,255,255,0.06), transparent 26%),
-      repeating-linear-gradient(120deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 12px);
-    mask-image: linear-gradient(to bottom, black, transparent 78%);
-  }
-
-  .container { width: min(100%, 760px); margin: 0 auto; padding: 24px 16px 34px; position: relative; }
-
-  .hero {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 28px;
-    padding: 26px 22px 22px;
-    background:
-      linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.68)),
-      radial-gradient(circle at 80% 20%, rgba(250, 204, 21, 0.20), transparent 28%),
-      radial-gradient(circle at 20% 85%, rgba(14, 165, 233, 0.18), transparent 30%);
-    box-shadow: var(--shadow);
-    margin-bottom: 16px;
-  }
-
-  .hero::after {
-    content: "";
-    position: absolute;
-    width: 180px;
-    height: 180px;
-    right: -54px;
-    top: -58px;
-    border-radius: 999px;
-    border: 24px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .hero-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; position: relative; z-index: 1; }
-  .kicker { display: inline-flex; align-items: center; gap: 8px; color: #BAE6FD; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
-  .designer-credit {
-    display: inline-flex;
-    align-items: center;
-    margin-top: 10px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.08);
-    color: #E2E8F0;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  h1 { font-size: clamp(34px, 9vw, 56px); line-height: 0.95; letter-spacing: -0.06em; max-width: 560px; }
-  .subtitle { color: var(--soft); font-size: 15px; line-height: 1.55; margin-top: 14px; max-width: 610px; }
-
-  .readiness-orb {
-    min-width: 108px;
-    min-height: 108px;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    border-radius: 28px;
-    background: linear-gradient(160deg, var(--accent-soft), rgba(255,255,255,0.04));
-    border: 1px solid rgba(255,255,255,0.14);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-  }
-
-  .readiness-orb span { font-size: 30px; display: block; margin-bottom: 6px; }
-  .readiness-orb strong { color: var(--text); font-size: 12px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.07em; }
-
-  .activity-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; position: relative; z-index: 1; }
-  .chip { border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: #E2E8F0; border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 700; backdrop-filter: blur(12px); }
-
-  .panel,
-  .metric-card,
-  .guidance-card,
-  .map-card {
-    border: 1px solid var(--line);
-    background: var(--panel);
-    border-radius: 24px;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.28);
-    backdrop-filter: blur(18px);
-  }
-
-  .panel { padding: 18px; margin-bottom: 14px; }
-  .section-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .section-title h2 { font-size: 15px; letter-spacing: 0.02em; }
-  .section-title p { color: var(--muted); font-size: 12px; }
-
-  .slider-group { padding: 16px; border-radius: 20px; background: rgba(15, 23, 42, 0.72); border: 1px solid rgba(148, 163, 184, 0.12); margin-bottom: 12px; }
-  .slider-group:last-child { margin-bottom: 0; }
-  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-  .slider-label { color: #CBD5E1; font-size: 13px; font-weight: 750; }
-  .slider-value { color: white; font-size: 26px; font-weight: 900; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
-  .slider-range { display: flex; justify-content: space-between; font-size: 11px; color: #64748B; margin-top: 8px; }
-
-  input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 12px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #38BDF8, #22C55E 50%, #F59E0B 72%, #EF4444);
-    outline: none;
-    cursor: pointer;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #F8FAFC;
-    border: 4px solid #0F172A;
-    box-shadow: 0 6px 22px rgba(0,0,0,0.42), 0 0 0 2px rgba(255,255,255,0.25);
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #F8FAFC;
-    border: 4px solid #0F172A;
-    box-shadow: 0 6px 22px rgba(0,0,0,0.42), 0 0 0 2px rgba(255,255,255,0.25);
-  }
-
-  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .metric-card { padding: 18px; overflow: hidden; position: relative; }
-  .metric-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0%, var(--accent-soft), transparent 38%); pointer-events: none; }
-  .metric-label { color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; position: relative; }
-  .metric-value { font-size: clamp(34px, 12vw, 52px); line-height: 1; font-weight: 950; letter-spacing: -0.07em; font-variant-numeric: tabular-nums; position: relative; }
-  .metric-unit { font-size: 16px; color: var(--muted); letter-spacing: 0; margin-left: 2px; }
-  .gauge-track { position: relative; height: 11px; border-radius: 999px; background: rgba(15, 23, 42, 0.92); overflow: hidden; margin: 14px 0 9px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
-  .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.35s ease, background 0.35s ease; }
-  .metric-footer { display: flex; justify-content: space-between; gap: 10px; align-items: center; position: relative; }
-  .gauge-comfort { font-size: 13px; font-weight: 850; transition: color 0.3s ease; }
-  .gauge-sub { color: #64748B; font-size: 11px; text-align: right; }
-
-  .guidance-card { padding: 18px; margin-bottom: 14px; background: linear-gradient(160deg, var(--panel-strong), rgba(15,23,42,0.70)); }
-  .guidance-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
-  .status-pill { border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 900; color: white; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent), transparent 55%); }
-  .guidance-title { font-size: 25px; line-height: 1.05; letter-spacing: -0.04em; margin-bottom: 8px; }
-  .guidance-text { color: var(--soft); font-size: 14px; line-height: 1.55; }
-  .cue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
-  .cue { padding: 12px; border-radius: 17px; background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.09); }
-  .cue-label { color: #94A3B8; font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
-  .cue-value { color: #F8FAFC; font-size: 13px; line-height: 1.35; font-weight: 750; }
-
-  .map-card { padding: 18px; }
-  .heatmap-title { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 12px; }
-  .heatmap-title h2 { font-size: 15px; letter-spacing: 0.02em; }
-  .heatmap-title span { color: var(--muted); font-size: 11px; text-align: right; }
-  .heatmap-wrap { overflow-x: auto; padding-bottom: 2px; }
-  table { border-collapse: separate; border-spacing: 5px; width: 100%; min-width: 520px; font-size: 12px; text-align: center; }
-  th { padding: 8px 6px; color: #94A3B8; font-weight: 850; }
-  th:first-child { text-align: left; color: #64748B; }
-  td:first-child { text-align: left; color: #CBD5E1; font-weight: 900; background: transparent; box-shadow: none; }
-  td { padding: 9px 7px; color: #F8FAFC; font-variant-numeric: tabular-nums; border-radius: 10px; border: 2px solid transparent; transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.12); }
-  td.highlight { font-weight: 950; border-color: #FFFFFF; transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 22px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.22); }
-  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #94A3B8; margin-top: 12px; }
-  .legend span { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,0.05); }
-  .legend-dot { width: 11px; height: 11px; border-radius: 4px; display: inline-block; }
-  .privacy-note {
-    margin-top: 16px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    border: 1px solid var(--line);
-    background: rgba(15, 23, 42, 0.72);
-  }
-  .privacy-note strong { display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #E2E8F0; margin-bottom: 6px; }
-  .privacy-note p { color: #94A3B8; font-size: 12px; line-height: 1.5; }
-  .footer-note { color: #64748B; font-size: 12px; line-height: 1.55; margin-top: 18px; text-align: center; }
-
-  @media (max-width: 640px) {
-    .container { padding: 14px 12px 28px; }
-    .hero { border-radius: 24px; padding: 22px 18px 18px; }
-    .hero-top { display: block; }
-    .readiness-orb { min-height: 82px; min-width: 100%; grid-template-columns: auto 1fr; text-align: left; padding: 12px 14px; margin-top: 18px; }
-    .readiness-orb span { margin: 0 10px 0 0; }
-    .summary-grid, .cue-grid { grid-template-columns: 1fr; }
-    .guidance-header { align-items: flex-start; flex-direction: column; }
-    .metric-card, .panel, .guidance-card, .map-card { border-radius: 22px; }
-  }
+:root{--bg:#07111f;--card:rgba(15,23,42,.82);--line:rgba(148,163,184,.18);--muted:#94a3b8;--text:#f8fafc;--soft:#cbd5e1;--accent:#22c55e;--accent-soft:rgba(34,197,94,.16);--safe-top:max(16px,env(safe-area-inset-top));--safe-right:max(12px,env(safe-area-inset-right));--safe-bottom:max(18px,env(safe-area-inset-bottom));--safe-left:max(12px,env(safe-area-inset-left))}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}body{min-height:100vh;min-height:100dvh;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;background:radial-gradient(circle at 8% 0%,rgba(14,165,233,.30),transparent 30%),radial-gradient(circle at 92% 4%,rgba(34,197,94,.22),transparent 30%),linear-gradient(180deg,#07111f 0%,#0f172a 52%,#111827 100%);-webkit-text-size-adjust:100%;overflow-x:hidden}.app{width:min(100%,720px);margin:0 auto;padding:calc(var(--safe-top) + 8px) var(--safe-right) calc(var(--safe-bottom) + 28px) var(--safe-left)}.hero,.card,.metric,.bottom-bar{border:1px solid var(--line);background:var(--card);box-shadow:0 20px 60px rgba(0,0,0,.34);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.hero{position:relative;overflow:hidden;border-radius:28px;padding:22px 18px 18px;margin-bottom:12px;background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(15,23,42,.72)),radial-gradient(circle at 82% 16%,rgba(250,204,21,.20),transparent 30%),radial-gradient(circle at 10% 92%,rgba(14,165,233,.18),transparent 34%)}.hero:after{content:"";position:absolute;right:-58px;top:-58px;width:170px;height:170px;border-radius:50%;border:24px solid rgba(255,255,255,.05)}.kicker{position:relative;z-index:1;color:#bae6fd;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}.hero h1{position:relative;z-index:1;font-size:clamp(31px,10vw,54px);line-height:.94;letter-spacing:-.06em}.subtitle{position:relative;z-index:1;color:var(--soft);font-size:14px;line-height:1.55;margin-top:12px}.status-row{position:relative;z-index:1;display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}.readiness{display:flex;align-items:center;gap:12px;border-radius:20px;padding:12px 14px;background:linear-gradient(160deg,var(--accent-soft),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.13)}#conditionIcon{font-size:28px;line-height:1}.readiness small{display:block;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}.readiness strong{font-size:15px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.chip{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:999px;padding:8px 10px;color:#e2e8f0;font-size:12px;font-weight:750}.card{border-radius:24px;padding:16px;margin-bottom:12px}.section-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:14px}.section-head h2{font-size:15px}.section-head p{font-size:12px;color:var(--muted);text-align:right}.slider-box{padding:14px;border-radius:20px;background:rgba(15,23,42,.76);border:1px solid rgba(148,163,184,.12);margin-bottom:12px}.slider-box:last-child{margin-bottom:0}.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}.slider-label{font-size:13px;color:#cbd5e1;font-weight:760}.slider-value{font-size:29px;font-weight:950;letter-spacing:-.05em;font-variant-numeric:tabular-nums}.slider-range{display:flex;justify-content:space-between;color:#64748b;font-size:11px;margin-top:10px}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:15px;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#22c55e 50%,#f59e0b 72%,#ef4444);outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:36px;height:36px;border-radius:50%;background:#f8fafc;border:4px solid #0f172a;box-shadow:0 9px 26px rgba(0,0,0,.42),0 0 0 2px rgba(255,255,255,.25)}input[type=range]::-moz-range-thumb{width:36px;height:36px;border-radius:50%;background:#f8fafc;border:4px solid #0f172a;box-shadow:0 9px 26px rgba(0,0,0,.42),0 0 0 2px rgba(255,255,255,.25)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.metric{position:relative;overflow:hidden;border-radius:24px;padding:16px}.metric:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,var(--accent-soft),transparent 42%);pointer-events:none}.metric-label{position:relative;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}.metric-value{position:relative;font-size:clamp(34px,12vw,50px);line-height:1;font-weight:950;letter-spacing:-.07em;font-variant-numeric:tabular-nums}.unit{font-size:16px;color:var(--muted);letter-spacing:0;margin-left:2px}.gauge-track{position:relative;height:11px;border-radius:999px;background:rgba(15,23,42,.94);overflow:hidden;margin:14px 0 9px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.gauge-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;transition:width .35s ease,background .35s ease}.metric-foot{position:relative;display:flex;justify-content:space-between;gap:8px;align-items:center}.comfort{font-size:13px;font-weight:850}.sub{font-size:11px;color:#64748b;text-align:right}.guidance h2{font-size:24px;line-height:1.05;letter-spacing:-.04em;margin-bottom:8px}.guidance-text{color:var(--soft);font-size:14px;line-height:1.6}.guidance-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:13px}.tag{border-radius:999px;padding:8px 10px;background:var(--accent-soft);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:900;white-space:nowrap}.cues{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}.cue{padding:11px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}.cue b{display:block;color:#94a3b8;font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}.cue span{font-size:13px;font-weight:760;line-height:1.32}.map-hint{font-size:11px;color:#64748b;margin:-4px 0 10px}.map-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -2px}.map-wrap::-webkit-scrollbar{display:none}table{border-collapse:separate;border-spacing:5px;width:100%;min-width:520px;font-size:12px;text-align:center}th{padding:8px 6px;color:#94a3b8;font-weight:850}td{padding:9px 7px;color:#fff;border-radius:10px;border:2px solid transparent;font-variant-numeric:tabular-nums;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}td:first-child{position:sticky;left:0;background:#0f172a;color:#cbd5e1;font-weight:900;text-align:left}td.highlight{font-weight:950;border-color:#fff;transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.22)}.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#94a3b8;margin-top:12px}.legend span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.05)}.dot{width:11px;height:11px;border-radius:4px;display:inline-block}.note{color:#64748b;font-size:12px;line-height:1.55;margin-top:15px;text-align:center}.bottom-bar{position:sticky;bottom:calc(var(--safe-bottom) - 2px);z-index:10;border-radius:22px;padding:10px 11px;background:rgba(7,17,31,.84);margin-top:14px}.bottom-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bottom-pill{padding:7px 6px;border-radius:15px;background:rgba(255,255,255,.055);text-align:center}.bottom-pill label{display:block;color:#64748b;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}.bottom-pill strong{font-size:14px;color:#f8fafc}@media(max-width:640px){.metrics,.cues{grid-template-columns:1fr}.section-head{display:block}.section-head p{text-align:left;margin-top:4px}.guidance-top{display:block}.tag{display:inline-block;margin-top:10px}.hero,.card,.metric,.bottom-bar{border-radius:22px}.app{padding-left:var(--safe-left);padding-right:var(--safe-right)}}@media(max-width:390px){.app{padding-left:10px;padding-right:10px}.hero h1{font-size:30px}.slider-value{font-size:27px}.metric-value{font-size:34px}.bottom-pill strong{font-size:13px}}
 </style>
 </head>
 <body>
-<main class="container">
-  <section class="hero">
-    <div class="hero-top">
-      <div>
-        <div class="kicker">▲ Outdoor activity comfort</div>
-        <h1>Know the air before you move.</h1>
-        <p class="subtitle">A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.</p>
-        <div class="designer-credit">Designed by DW</div>
-      </div>
-      <div class="readiness-orb" aria-live="polite">
-        <span id="conditionIcon">🟢</span>
-        <strong id="readinessLabel">Green light</strong>
-      </div>
-    </div>
-    <div class="activity-row" aria-label="Outdoor activities">
-      <span class="chip">🏃 Run</span>
-      <span class="chip">🚴 Ride</span>
-      <span class="chip">🥾 Hike</span>
-      <span class="chip">🏁 Race day</span>
-      <span class="chip">💧 Sweat check</span>
-    </div>
-  </section>
-
-  <section class="panel" aria-label="Weather inputs">
-    <div class="section-title">
-      <h2>Set the conditions</h2>
-      <p>Drag to simulate your workout window</p>
-    </div>
-    <div class="slider-group">
-      <div class="slider-header">
-        <span class="slider-label">Air Temperature</span>
-        <span class="slider-value" id="tempVal">74°F</span>
-      </div>
-      <input type="range" id="tempSlider" min="60" max="100" value="74" aria-label="Air temperature in Fahrenheit">
-      <div class="slider-range"><span>Cool 60°F</span><span>Hot 100°F</span></div>
-    </div>
-    <div class="slider-group">
-      <div class="slider-header">
-        <span class="slider-label">Relative Humidity</span>
-        <span class="slider-value" id="rhVal">67%</span>
-      </div>
-      <input type="range" id="rhSlider" min="10" max="95" value="67" aria-label="Relative humidity percent">
-      <div class="slider-range"><span>Dry 10%</span><span>Steam 95%</span></div>
-    </div>
-  </section>
-
-  <section class="summary-grid" aria-label="Calculated comfort metrics">
-    <article class="metric-card">
-      <div class="metric-label">Dew point</div>
-      <div class="metric-value" id="dpValue">62.3<span class="metric-unit">°F</span></div>
-      <div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div>
-      <div class="metric-footer">
-        <span class="gauge-comfort" id="dpComfort">Noticeable</span>
-        <span class="gauge-sub">Moisture load</span>
-      </div>
-    </article>
-    <article class="metric-card">
-      <div class="metric-label">Feels like</div>
-      <div class="metric-value" id="flValue">74.0<span class="metric-unit">°F</span></div>
-      <div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div>
-      <div class="metric-footer">
-        <span class="gauge-comfort" id="flComfort">Comfortable</span>
-        <span class="gauge-sub">Heat index</span>
-      </div>
-    </article>
-  </section>
-
-  <section class="guidance-card" id="guidanceCard" aria-live="polite">
-    <div class="guidance-header">
-      <div>
-        <div class="metric-label">Training guidance</div>
-        <h2 class="guidance-title" id="guidanceTitle">Manage effort</h2>
-      </div>
-      <span class="status-pill" id="conditionTag">Noticeable humidity</span>
-    </div>
-    <p class="guidance-text" id="guidanceText">You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.</p>
-    <div class="cue-grid">
-      <div class="cue">
-        <div class="cue-label">Pace</div>
-        <div class="cue-value" id="paceCue">Back off 1–3%</div>
-      </div>
-      <div class="cue">
-        <div class="cue-label">Hydration</div>
-        <div class="cue-value" id="hydrationCue">Bring fluids for longer sessions</div>
-      </div>
-      <div class="cue">
-        <div class="cue-label">Exposure</div>
-        <div class="cue-value" id="exposureCue">Shade helps</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="map-card">
-    <div class="heatmap-title">
-      <h2>Dew point map</h2>
-      <span>°F by temperature × humidity</span>
-    </div>
-    <div class="heatmap-wrap">
-      <table id="heatmap" aria-label="Dew point map by temperature and humidity"></table>
-    </div>
-    <div class="legend">
-      <span><i class="legend-dot" style="background:#0EA5E9"></i>Dry</span>
-      <span><i class="legend-dot" style="background:#16A34A"></i>Comfortable</span>
-      <span><i class="legend-dot" style="background:#F59E0B"></i>Sticky</span>
-      <span><i class="legend-dot" style="background:#DC2626"></i>Oppressive</span>
-    </div>
-    <div class="privacy-note">
-      <strong>Privacy notice</strong>
-      <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
-    </div>
-    <p class="footer-note">Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.</p>
-  </section>
+<main class="app">
+<section class="hero">
+<div class="kicker">▲ Outdoor activity comfort</div>
+<h1>Know the air before you move.</h1>
+<p class="subtitle">Built for runners, cyclists, hikers, and race-day planners. Adjust conditions and see how humidity changes comfort, cooling, and training feel.</p>
+<div class="status-row"><div class="readiness"><span id="conditionIcon">🟢</span><div><small>Current signal</small><strong id="readinessLabel">Green light</strong></div></div></div>
+<div class="chips"><span class="chip">🏃 Run</span><span class="chip">🚴 Ride</span><span class="chip">🥾 Hike</span><span class="chip">🏁 Race day</span><span class="chip">💧 Sweat check</span></div>
+</section>
+<section class="card">
+<div class="section-head"><h2>Set the conditions</h2><p>Thumb-friendly controls</p></div>
+<div class="slider-box"><div class="slider-head"><span class="slider-label">Air Temperature</span><span class="slider-value" id="tempVal">74°F</span></div><input type="range" id="tempSlider" min="60" max="100" value="74" aria-label="Air temperature in Fahrenheit"><div class="slider-range"><span>Cool 60°F</span><span>Hot 100°F</span></div></div>
+<div class="slider-box"><div class="slider-head"><span class="slider-label">Relative Humidity</span><span class="slider-value" id="rhVal">67%</span></div><input type="range" id="rhSlider" min="10" max="95" value="67" aria-label="Relative humidity percent"><div class="slider-range"><span>Dry 10%</span><span>Steam 95%</span></div></div>
+</section>
+<section class="metrics">
+<article class="metric"><div class="metric-label">Dew point</div><div class="metric-value" id="dpValue">62.3<span class="unit">°F</span></div><div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div><div class="metric-foot"><span class="comfort" id="dpComfort">Noticeable</span><span class="sub">Moisture load</span></div></article>
+<article class="metric"><div class="metric-label">Feels like</div><div class="metric-value" id="flValue">74.0<span class="unit">°F</span></div><div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div><div class="metric-foot"><span class="comfort" id="flComfort">Comfortable</span><span class="sub">Heat index</span></div></article>
+</section>
+<section class="card guidance">
+<div class="guidance-top"><div><div class="metric-label">Training guidance</div><h2 id="guidanceTitle">Manage effort</h2></div><span class="tag" id="conditionTag">Noticeable humidity</span></div>
+<p class="guidance-text" id="guidanceText">You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.</p>
+<div class="cues"><div class="cue"><b>Pace</b><span id="paceCue">Back off 1–3%</span></div><div class="cue"><b>Hydration</b><span id="hydrationCue">Bring fluids</span></div><div class="cue"><b>Exposure</b><span id="exposureCue">Shade helps</span></div></div>
+</section>
+<section class="card"><div class="section-head"><h2>Dew point map</h2><p>°F by temp × humidity</p></div><p class="map-hint">Swipe sideways on iPhone to explore the full table →</p><div class="map-wrap"><table id="heatmap" aria-label="Dew point map by temperature and humidity"></table></div><div class="legend"><span><i class="dot" style="background:#0ea5e9"></i>Dry</span><span><i class="dot" style="background:#16a34a"></i>Comfortable</span><span><i class="dot" style="background:#f59e0b"></i>Sticky</span><span><i class="dot" style="background:#dc2626"></i>Oppressive</span></div><p class="note">Dew point tracks actual moisture in the air and often predicts outdoor comfort better than relative humidity alone.</p></section>
+<section class="bottom-bar"><div class="bottom-inner"><div class="bottom-pill"><label>Temp</label><strong id="tempMini">74°F</strong></div><div class="bottom-pill"><label>Dew pt</label><strong id="dpMini">62.3°F</strong></div><div class="bottom-pill"><label>Feels</label><strong id="flMini">74.0°F</strong></div></div></section>
 </main>
-
 <script>
-const tempSlider = document.getElementById('tempSlider');
-const rhSlider = document.getElementById('rhSlider');
-const heatmapTemps = [68, 72, 76, 80, 84, 88, 92];
-const heatmapRHs = [30, 40, 50, 60, 70, 80, 90];
-
-function calcDewPoint(T, RH) {
-  const Tc = (T - 32) * 5 / 9;
-  const a = 17.27, b = 237.7;
-  const gamma = (a * Tc) / (b + Tc) + Math.log(RH / 100);
-  const dpC = (b * gamma) / (a - gamma);
-  return dpC * 9 / 5 + 32;
-}
-
-function calcHeatIndex(T, RH) {
-  if (T < 80) return T;
-  let HI = -42.379 + 2.04901523*T + 10.14333127*RH
-    - 0.22475541*T*RH - 0.00683783*T*T
-    - 0.05481717*RH*RH + 0.00122874*T*T*RH
-    + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH;
-  if (RH < 13 && T >= 80 && T <= 112)
-    HI -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
-  if (RH > 85 && T >= 80 && T <= 87)
-    HI += ((RH - 85) / 10) * ((87 - T) / 5);
-  return HI;
-}
-
-function dpComfort(dp) {
-  if (dp < 50) return { label: 'Dry', color: '#38BDF8' };
-  if (dp < 55) return { label: 'Comfortable', color: '#22C55E' };
-  if (dp < 60) return { label: 'Pleasant', color: '#84CC16' };
-  if (dp < 65) return { label: 'Noticeable', color: '#FACC15' };
-  if (dp < 70) return { label: 'Sticky', color: '#FB923C' };
-  return { label: 'Oppressive', color: '#F87171' };
-}
-
-function flComfort(fl) {
-  if (fl < 80) return { label: 'Comfortable', color: '#22C55E' };
-  if (fl < 90) return { label: 'Caution', color: '#FACC15' };
-  if (fl < 105) return { label: 'Danger', color: '#FB923C' };
-  return { label: 'Extreme', color: '#F87171' };
-}
-
-function cellColor(dp) {
-  if (dp < 50) return '#075985';
-  if (dp < 55) return '#047857';
-  if (dp < 60) return '#15803D';
-  if (dp < 65) return '#B45309';
-  if (dp < 70) return '#C2410C';
-  return '#B91C1C';
-}
-
-function getGuidance(dp, fl) {
-  if (dp < 55 && fl < 82) {
-    return {
-      icon: '🟢', label: 'Green light', tag: 'Fast air', title: 'Great outdoor window',
-      text: 'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.',
-      pace: 'Normal pace', hydration: 'Normal fluids', exposure: 'Low climate stress', color: '#22C55E'
-    };
-  }
-  if (dp < 60 && fl < 86) {
-    return {
-      icon: '🟢', label: 'Good to go', tag: 'Comfortable', title: 'Comfortable for most sessions',
-      text: 'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.',
-      pace: 'Normal to +1%', hydration: 'Drink to thirst', exposure: 'Good window', color: '#84CC16'
-    };
-  }
-  if (dp < 65 && fl < 92) {
-    return {
-      icon: '🟡', label: 'Manage effort', tag: 'Noticeable humidity', title: 'Respect the moisture load',
-      text: 'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.',
-      pace: 'Back off 1–3%', hydration: 'Bring fluids', exposure: 'Shade helps', color: '#FACC15'
-    };
-  }
-  if (dp < 70 && fl < 100) {
-    return {
-      icon: '🟠', label: 'Adjust plan', tag: 'Sticky air', title: 'Dial down intensity',
-      text: 'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.',
-      pace: 'Back off 3–6%', hydration: 'Plan electrolytes', exposure: 'Avoid peak sun', color: '#FB923C'
-    };
-  }
-  return {
-    icon: '🔴', label: 'Heat caution', tag: 'Oppressive', title: 'Choose safer timing',
-    text: 'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.',
-    pace: 'Back off 6–10%+', hydration: 'Fluids + sodium', exposure: 'Seek shade/cooler time', color: '#F87171'
-  };
-}
-
-function setSliderProgress(slider) {
-  const min = +slider.min;
-  const max = +slider.max;
-  const value = +slider.value;
-  const pct = ((value - min) / (max - min)) * 100;
-  slider.style.background = `linear-gradient(90deg, #38BDF8 0%, #22C55E ${Math.max(20, pct * 0.65)}%, #F59E0B ${Math.max(55, pct)}%, #EF4444 100%)`;
-}
-
-function buildHeatmap() {
-  let html = '<thead><tr><th>RH\\T</th>';
-  heatmapTemps.forEach(t => html += `<th>${t}°</th>`);
-  html += '</tr></thead><tbody>';
-  heatmapRHs.forEach(r => {
-    html += `<tr><td>${r}%</td>`;
-    heatmapTemps.forEach(t => {
-      const d = calcDewPoint(t, r);
-      html += `<td data-t="${t}" data-r="${r}" style="background:${cellColor(d)}">${d.toFixed(0)}</td>`;
-    });
-    html += '</tr>';
-  });
-  html += '</tbody>';
-  document.getElementById('heatmap').innerHTML = html;
-}
-
-function update() {
-  const T = +tempSlider.value;
-  const RH = +rhSlider.value;
-  document.getElementById('tempVal').textContent = T + '°F';
-  document.getElementById('rhVal').textContent = RH + '%';
-  setSliderProgress(tempSlider);
-  setSliderProgress(rhSlider);
-
-  const dp = calcDewPoint(T, RH);
-  const fl = calcHeatIndex(T, RH);
-  const dpc = dpComfort(dp);
-  const flc = flComfort(fl);
-  const guidance = getGuidance(dp, fl);
-  document.documentElement.style.setProperty('--accent', guidance.color);
-  document.documentElement.style.setProperty('--accent-soft', guidance.color + '22');
-
-  document.getElementById('dpValue').innerHTML = dp.toFixed(1) + '<span class="metric-unit">°F</span>';
-  const dpPct = Math.max(0, Math.min(100, ((dp - 20) / 60) * 100));
-  const dpFill = document.getElementById('dpFill');
-  dpFill.style.width = dpPct + '%';
-  dpFill.style.background = `linear-gradient(90deg, ${dpc.color}66, ${dpc.color})`;
-  document.getElementById('dpComfort').textContent = dpc.label;
-  document.getElementById('dpComfort').style.color = dpc.color;
-
-  document.getElementById('flValue').innerHTML = fl.toFixed(1) + '<span class="metric-unit">°F</span>';
-  const flPct = Math.max(0, Math.min(100, ((fl - 60) / 70) * 100));
-  const flFillEl = document.getElementById('flFill');
-  flFillEl.style.width = flPct + '%';
-  flFillEl.style.background = `linear-gradient(90deg, ${flc.color}66, ${flc.color})`;
-  document.getElementById('flComfort').textContent = flc.label;
-  document.getElementById('flComfort').style.color = flc.color;
-
-  document.getElementById('conditionIcon').textContent = guidance.icon;
-  document.getElementById('readinessLabel').textContent = guidance.label;
-  document.getElementById('conditionTag').textContent = guidance.tag;
-  document.getElementById('conditionTag').style.color = guidance.color;
-  document.getElementById('guidanceTitle').textContent = guidance.title;
-  document.getElementById('guidanceText').textContent = guidance.text;
-  document.getElementById('paceCue').textContent = guidance.pace;
-  document.getElementById('hydrationCue').textContent = guidance.hydration;
-  document.getElementById('exposureCue').textContent = guidance.exposure;
-
-  document.querySelectorAll('#heatmap td[data-t]').forEach(td => {
-    const ct = +td.dataset.t, cr = +td.dataset.r;
-    td.classList.toggle('highlight', Math.abs(ct - T) <= 2 && Math.abs(cr - RH) <= 5);
-  });
-}
-
-buildHeatmap();
-update();
-tempSlider.addEventListener('input', update);
-rhSlider.addEventListener('input', update);
+const tempSlider=document.getElementById('tempSlider'),rhSlider=document.getElementById('rhSlider'),heatmapTemps=[68,72,76,80,84,88,92],heatmapRHs=[30,40,50,60,70,80,90];
+function calcDewPoint(T,RH){const Tc=(T-32)*5/9,a=17.27,b=237.7,g=(a*Tc)/(b+Tc)+Math.log(RH/100),dpC=(b*g)/(a-g);return dpC*9/5+32}
+function calcHeatIndex(T,RH){if(T<80)return T;let HI=-42.379+2.04901523*T+10.14333127*RH-.22475541*T*RH-.00683783*T*T-.05481717*RH*RH+.00122874*T*T*RH+.00085282*T*RH*RH-.00000199*T*T*RH*RH;if(RH<13&&T>=80&&T<=112)HI-=((13-RH)/4)*Math.sqrt((17-Math.abs(T-95))/17);if(RH>85&&T>=80&&T<=87)HI+=((RH-85)/10)*((87-T)/5);return HI}
+function dpComfort(dp){if(dp<50)return{label:'Dry',color:'#38bdf8'};if(dp<55)return{label:'Comfortable',color:'#22c55e'};if(dp<60)return{label:'Pleasant',color:'#84cc16'};if(dp<65)return{label:'Noticeable',color:'#facc15'};if(dp<70)return{label:'Sticky',color:'#fb923c'};return{label:'Oppressive',color:'#f87171'}}
+function flComfort(fl){if(fl<80)return{label:'Comfortable',color:'#22c55e'};if(fl<90)return{label:'Caution',color:'#facc15'};if(fl<105)return{label:'Danger',color:'#fb923c'};return{label:'Extreme',color:'#f87171'}}
+function cellColor(dp){if(dp<50)return'#075985';if(dp<55)return'#047857';if(dp<60)return'#15803d';if(dp<65)return'#b45309';if(dp<70)return'#c2410c';return'#b91c1c'}
+function getGuidance(dp,fl){if(dp<55&&fl<82)return{icon:'🟢',label:'Green light',tag:'Fast air',title:'Great outdoor window',text:'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.',pace:'Normal pace',hydration:'Normal fluids',exposure:'Low climate stress',color:'#22c55e'};if(dp<60&&fl<86)return{icon:'🟢',label:'Good to go',tag:'Comfortable',title:'Comfortable for most sessions',text:'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.',pace:'Normal to +1%',hydration:'Drink to thirst',exposure:'Good window',color:'#84cc16'};if(dp<65&&fl<92)return{icon:'🟡',label:'Manage effort',tag:'Noticeable humidity',title:'Respect the moisture load',text:'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.',pace:'Back off 1–3%',hydration:'Bring fluids',exposure:'Shade helps',color:'#facc15'};if(dp<70&&fl<100)return{icon:'🟠',label:'Adjust plan',tag:'Sticky air',title:'Dial down intensity',text:'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.',pace:'Back off 3–6%',hydration:'Plan electrolytes',exposure:'Avoid peak sun',color:'#fb923c'};return{icon:'🔴',label:'Heat caution',tag:'Oppressive',title:'Choose safer timing',text:'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.',pace:'Back off 6–10%+',hydration:'Fluids + sodium',exposure:'Seek shade/cooler time',color:'#f87171'}}
+function setSliderProgress(slider){const min=+slider.min,max=+slider.max,value=+slider.value,pct=(value-min)/(max-min)*100;slider.style.background=`linear-gradient(90deg,#38bdf8 0%,#22c55e ${Math.max(20,pct*.65)}%,#f59e0b ${Math.max(55,pct)}%,#ef4444 100%)`}
+function buildHeatmap(){let html='<thead><tr><th>RH\\T</th>';heatmapTemps.forEach(t=>html+=`<th>${t}°</th>`);html+='</tr></thead><tbody>';heatmapRHs.forEach(r=>{html+=`<tr><td>${r}%</td>`;heatmapTemps.forEach(t=>{const d=calcDewPoint(t,r);html+=`<td data-t="${t}" data-r="${r}" style="background:${cellColor(d)}">${d.toFixed(0)}</td>`});html+='</tr>'});html+='</tbody>';document.getElementById('heatmap').innerHTML=html}
+function update(){const T=+tempSlider.value,RH=+rhSlider.value;document.getElementById('tempVal').textContent=T+'°F';document.getElementById('rhVal').textContent=RH+'%';document.getElementById('tempMini').textContent=T+'°F';setSliderProgress(tempSlider);setSliderProgress(rhSlider);const dp=calcDewPoint(T,RH),fl=calcHeatIndex(T,RH),dpc=dpComfort(dp),flc=flComfort(fl),g=getGuidance(dp,fl);document.documentElement.style.setProperty('--accent',g.color);document.documentElement.style.setProperty('--accent-soft',g.color+'22');document.getElementById('dpValue').innerHTML=dp.toFixed(1)+'<span class="unit">°F</span>';document.getElementById('dpMini').textContent=dp.toFixed(1)+'°F';const dpPct=Math.max(0,Math.min(100,(dp-20)/60*100)),dpFill=document.getElementById('dpFill');dpFill.style.width=dpPct+'%';dpFill.style.background=`linear-gradient(90deg,${dpc.color}66,${dpc.color})`;document.getElementById('dpComfort').textContent=dpc.label;document.getElementById('dpComfort').style.color=dpc.color;document.getElementById('flValue').innerHTML=fl.toFixed(1)+'<span class="unit">°F</span>';document.getElementById('flMini').textContent=fl.toFixed(1)+'°F';const flPct=Math.max(0,Math.min(100,(fl-60)/70*100)),flFill=document.getElementById('flFill');flFill.style.width=flPct+'%';flFill.style.background=`linear-gradient(90deg,${flc.color}66,${flc.color})`;document.getElementById('flComfort').textContent=flc.label;document.getElementById('flComfort').style.color=flc.color;document.getElementById('conditionIcon').textContent=g.icon;document.getElementById('readinessLabel').textContent=g.label;document.getElementById('conditionTag').textContent=g.tag;document.getElementById('conditionTag').style.color=g.color;document.getElementById('guidanceTitle').textContent=g.title;document.getElementById('guidanceText').textContent=g.text;document.getElementById('paceCue').textContent=g.pace;document.getElementById('hydrationCue').textContent=g.hydration;document.getElementById('exposureCue').textContent=g.exposure;document.querySelectorAll('#heatmap td[data-t]').forEach(td=>{const ct=+td.dataset.t,cr=+td.dataset.r;td.classList.toggle('highlight',Math.abs(ct-T)<=2&&Math.abs(cr-RH)<=5)})}
+buildHeatmap();update();tempSlider.addEventListener('input',update);rhSlider.addEventListener('input',update);
 </script>
-<script src="./visit-logger.js" defer></script>
 </body>
 </html>
