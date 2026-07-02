@@ -79,7 +79,18 @@
   }
 
   .hero-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; position: relative; z-index: 1; }
-  .kicker { display: inline-flex; align-items: center; gap: 8px; color: #BAE6FD; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .hero-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .kicker { display: inline-flex; align-items: center; gap: 8px; color: #BAE6FD; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+  .lang-btn {
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    background: rgba(15, 23, 42, 0.62);
+    color: #E2E8F0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+  }
   h1 { font-size: clamp(34px, 9vw, 56px); line-height: 0.95; letter-spacing: -0.06em; max-width: 560px; }
   .subtitle { color: var(--soft); font-size: 15px; line-height: 1.55; margin-top: 14px; max-width: 610px; }
 
@@ -230,9 +241,12 @@
   <section class="hero">
     <div class="hero-top">
       <div>
-        <div class="kicker">▲ Outdoor activity comfort</div>
-        <h1>Know the air before you move.</h1>
-        <p class="subtitle">A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.</p>
+        <div class="hero-tools">
+          <div class="kicker" id="kickerText">▲ Outdoor activity comfort</div>
+          <button type="button" class="lang-btn" id="languageToggle" aria-label="Switch to Simplified Chinese">中文</button>
+        </div>
+        <h1 id="heroTitle">Know the air before you move.</h1>
+        <p class="subtitle" id="heroSubtitle">A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.</p>
       </div>
       <div class="readiness-orb" aria-live="polite">
         <span id="conditionIcon">🟢</span>
@@ -240,17 +254,17 @@
       </div>
     </div>
     <div class="activity-row" aria-label="Outdoor activities">
-      <span class="chip">🏃 Run</span>
-      <span class="chip">🚴 Ride</span>
-      <span class="chip">🥾 Hike</span>
-      <span class="chip">🏁 Race day</span>
-      <span class="chip">💧 Sweat check</span>
+      <span class="chip">🏃 <span class="chip-text">Run</span></span>
+      <span class="chip">🚴 <span class="chip-text">Ride</span></span>
+      <span class="chip">🥾 <span class="chip-text">Hike</span></span>
+      <span class="chip">🏁 <span class="chip-text">Race day</span></span>
+      <span class="chip">💧 <span class="chip-text">Sweat check</span></span>
     </div>
   </section>
 
   <section class="panel" aria-label="Weather inputs">
     <div class="section-title">
-      <h2>Set the conditions</h2>
+      <h2 id="conditionsTitle">Set the conditions</h2>
       <div class="section-controls">
         <p id="unitHint">Drag to simulate your workout window</p>
         <div class="unit-toggle" role="group" aria-label="Temperature unit selector">
@@ -261,7 +275,7 @@
     </div>
     <div class="slider-group">
       <div class="slider-header">
-        <span class="slider-label">Air Temperature</span>
+        <span class="slider-label" id="airTempLabel">Air Temperature</span>
         <span class="slider-value" id="tempVal">74°F</span>
       </div>
       <input type="range" id="tempSlider" min="60" max="100" value="74" aria-label="Air temperature in Fahrenheit">
@@ -269,31 +283,31 @@
     </div>
     <div class="slider-group">
       <div class="slider-header">
-        <span class="slider-label">Relative Humidity</span>
+        <span class="slider-label" id="humidityLabel">Relative Humidity</span>
         <span class="slider-value" id="rhVal">67%</span>
       </div>
       <input type="range" id="rhSlider" min="10" max="95" value="67" aria-label="Relative humidity percent">
-      <div class="slider-range"><span>Dry 10%</span><span>Steam 95%</span></div>
+      <div class="slider-range"><span id="humidityMinLabel">Dry 10%</span><span id="humidityMaxLabel">Steam 95%</span></div>
     </div>
   </section>
 
   <section class="summary-grid" aria-label="Calculated comfort metrics">
     <article class="metric-card">
-      <div class="metric-label">Dew point</div>
+      <div class="metric-label" id="dewPointMetricLabel">Dew point</div>
       <div class="metric-value" id="dpValue">62.3<span class="metric-unit">°F</span></div>
       <div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div>
       <div class="metric-footer">
         <span class="gauge-comfort" id="dpComfort">Noticeable</span>
-        <span class="gauge-sub">Moisture load</span>
+        <span class="gauge-sub" id="moistureSubLabel">Moisture load</span>
       </div>
     </article>
     <article class="metric-card">
-      <div class="metric-label">Feels like</div>
+      <div class="metric-label" id="feelsLikeMetricLabel">Feels like</div>
       <div class="metric-value" id="flValue">74.0<span class="metric-unit">°F</span></div>
       <div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div>
       <div class="metric-footer">
         <span class="gauge-comfort" id="flComfort">Comfortable</span>
-        <span class="gauge-sub">Heat index</span>
+        <span class="gauge-sub" id="heatIndexSubLabel">Heat index</span>
       </div>
     </article>
   </section>
@@ -301,7 +315,7 @@
   <section class="guidance-card" id="guidanceCard" aria-live="polite">
     <div class="guidance-header">
       <div>
-        <div class="metric-label">Training guidance</div>
+        <div class="metric-label" id="trainingGuidanceLabel">Training guidance</div>
         <h2 class="guidance-title" id="guidanceTitle">Manage effort</h2>
       </div>
       <span class="status-pill" id="conditionTag">Noticeable humidity</span>
@@ -309,15 +323,15 @@
     <p class="guidance-text" id="guidanceText">You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.</p>
     <div class="cue-grid">
       <div class="cue">
-        <div class="cue-label">Pace</div>
+        <div class="cue-label" id="paceLabel">Pace</div>
         <div class="cue-value" id="paceCue">Back off 1–3%</div>
       </div>
       <div class="cue">
-        <div class="cue-label">Hydration</div>
+        <div class="cue-label" id="hydrationLabel">Hydration</div>
         <div class="cue-value" id="hydrationCue">Bring fluids for longer sessions</div>
       </div>
       <div class="cue">
-        <div class="cue-label">Exposure</div>
+        <div class="cue-label" id="exposureLabel">Exposure</div>
         <div class="cue-value" id="exposureCue">Shade helps</div>
       </div>
     </div>
@@ -325,23 +339,23 @@
 
   <section class="map-card">
     <div class="heatmap-title">
-      <h2>Dew point map</h2>
+      <h2 id="dewPointMapTitle">Dew point map</h2>
       <span id="heatmapUnitLabel">°F by temperature × humidity</span>
     </div>
     <div class="heatmap-wrap">
       <table id="heatmap" aria-label="Dew point map by temperature and humidity"></table>
     </div>
     <div class="legend">
-      <span><i class="legend-dot" style="background:#0EA5E9"></i>Dry</span>
-      <span><i class="legend-dot" style="background:#16A34A"></i>Comfortable</span>
-      <span><i class="legend-dot" style="background:#F59E0B"></i>Sticky</span>
-      <span><i class="legend-dot" style="background:#DC2626"></i>Oppressive</span>
+      <span><i class="legend-dot" style="background:#0EA5E9"></i><span class="legend-text">Dry</span></span>
+      <span><i class="legend-dot" style="background:#16A34A"></i><span class="legend-text">Comfortable</span></span>
+      <span><i class="legend-dot" style="background:#F59E0B"></i><span class="legend-text">Sticky</span></span>
+      <span><i class="legend-dot" style="background:#DC2626"></i><span class="legend-text">Oppressive</span></span>
     </div>
     <div class="privacy-note">
-      <strong>Privacy notice</strong>
-      <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
+      <strong id="privacyTitle">Privacy notice</strong>
+      <p id="privacyText">If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
     </div>
-    <p class="footer-note">Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.</p>
+    <p class="footer-note" id="footerText">Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.</p>
   </section>
 </main>
 
@@ -350,12 +364,129 @@ const tempSlider = document.getElementById('tempSlider');
 const rhSlider = document.getElementById('rhSlider');
 const unitFButton = document.getElementById('unitF');
 const unitCButton = document.getElementById('unitC');
+const languageToggle = document.getElementById('languageToggle');
 const tempMinLabel = document.getElementById('tempMinLabel');
 const tempMaxLabel = document.getElementById('tempMaxLabel');
 const heatmapUnitLabel = document.getElementById('heatmapUnitLabel');
+const kickerText = document.getElementById('kickerText');
+const heroTitle = document.getElementById('heroTitle');
+const heroSubtitle = document.getElementById('heroSubtitle');
+const chipTexts = [...document.querySelectorAll('.chip-text')];
+const conditionsTitle = document.getElementById('conditionsTitle');
+const unitHint = document.getElementById('unitHint');
+const airTempLabel = document.getElementById('airTempLabel');
+const humidityLabel = document.getElementById('humidityLabel');
+const humidityMinLabel = document.getElementById('humidityMinLabel');
+const humidityMaxLabel = document.getElementById('humidityMaxLabel');
+const dewPointMetricLabel = document.getElementById('dewPointMetricLabel');
+const feelsLikeMetricLabel = document.getElementById('feelsLikeMetricLabel');
+const moistureSubLabel = document.getElementById('moistureSubLabel');
+const heatIndexSubLabel = document.getElementById('heatIndexSubLabel');
+const trainingGuidanceLabel = document.getElementById('trainingGuidanceLabel');
+const paceLabel = document.getElementById('paceLabel');
+const hydrationLabel = document.getElementById('hydrationLabel');
+const exposureLabel = document.getElementById('exposureLabel');
+const dewPointMapTitle = document.getElementById('dewPointMapTitle');
+const legendTexts = [...document.querySelectorAll('.legend-text')];
+const privacyTitle = document.getElementById('privacyTitle');
+const privacyText = document.getElementById('privacyText');
+const footerText = document.getElementById('footerText');
+const heatmapEl = document.getElementById('heatmap');
 const heatmapTemps = [68, 72, 76, 80, 84, 88, 92];
 const heatmapRHs = [30, 40, 50, 60, 70, 80, 90];
 let tempUnit = 'F';
+let language = 'en';
+
+const copy = {
+  en: {
+    kicker: '▲ Outdoor activity comfort',
+    heroTitle: 'Know the air before you move.',
+    heroSubtitle: 'A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.',
+    chips: ['Run', 'Ride', 'Hike', 'Race day', 'Sweat check'],
+    conditionsTitle: 'Set the conditions',
+    unitHint: 'Drag to simulate your workout window',
+    airTemperature: 'Air Temperature',
+    humidity: 'Relative Humidity',
+    cool: 'Cool',
+    hot: 'Hot',
+    dry: 'Dry',
+    steam: 'Steam',
+    dewPoint: 'Dew point',
+    feelsLike: 'Feels like',
+    moistureLoad: 'Moisture load',
+    heatIndex: 'Heat index',
+    trainingGuidance: 'Training guidance',
+    pace: 'Pace',
+    hydration: 'Hydration',
+    exposure: 'Exposure',
+    dewPointMap: 'Dew point map',
+    heatmapUnitF: '°F by temperature × humidity',
+    heatmapUnitC: '°C by temperature × humidity',
+    heatmapAria: 'Dew point map by temperature and humidity',
+    heatmapCorner: 'RH\\T',
+    legend: ['Dry', 'Comfortable', 'Sticky', 'Oppressive'],
+    privacyTitle: 'Privacy notice',
+    privacyText: 'If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.',
+    footerText: 'Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.',
+    languageToggle: '中文',
+    languageToggleAria: 'Switch to Simplified Chinese',
+    comfortDp: { dry: 'Dry', comfortable: 'Comfortable', pleasant: 'Pleasant', noticeable: 'Noticeable', sticky: 'Sticky', oppressive: 'Oppressive' },
+    comfortFl: { comfortable: 'Comfortable', caution: 'Caution', danger: 'Danger', extreme: 'Extreme' },
+    guidance: {
+      fast: { label: 'Green light', tag: 'Fast air', title: 'Great outdoor window', text: 'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.', pace: 'Normal pace', hydration: 'Normal fluids', exposure: 'Low climate stress' },
+      good: { label: 'Good to go', tag: 'Comfortable', title: 'Comfortable for most sessions', text: 'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.', pace: 'Normal to +1%', hydration: 'Drink to thirst', exposure: 'Good window' },
+      notice: { label: 'Manage effort', tag: 'Noticeable humidity', title: 'Respect the moisture load', text: 'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.', pace: 'Back off 1–3%', hydration: 'Bring fluids', exposure: 'Shade helps' },
+      sticky: { label: 'Adjust plan', tag: 'Sticky air', title: 'Dial down intensity', text: 'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.', pace: 'Back off 3–6%', hydration: 'Plan electrolytes', exposure: 'Avoid peak sun' },
+      heat: { label: 'Heat caution', tag: 'Oppressive', title: 'Choose safer timing', text: 'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.', pace: 'Back off 6–10%+', hydration: 'Fluids + sodium', exposure: 'Seek shade/cooler time' },
+    },
+  },
+  zh: {
+    kicker: '▲ 户外活动舒适度',
+    heroTitle: '出发前先看空气。',
+    heroSubtitle: '为跑步、骑行、徒步和比赛日准备的快速指南。调整温度和湿度，查看露点、体感热度，以及空气对身体负担的变化。',
+    chips: ['跑步', '骑行', '徒步', '比赛日', '出汗检查'],
+    conditionsTitle: '设置条件',
+    unitHint: '拖动滑块模拟你的运动时段',
+    airTemperature: '气温',
+    humidity: '相对湿度',
+    cool: '凉爽',
+    hot: '炎热',
+    dry: '干燥',
+    steam: '闷热',
+    dewPoint: '露点',
+    feelsLike: '体感温度',
+    moistureLoad: '湿度负荷',
+    heatIndex: '热指数',
+    trainingGuidance: '训练建议',
+    pace: '配速',
+    hydration: '补水',
+    exposure: '暴晒',
+    dewPointMap: '露点地图',
+    heatmapUnitF: '按温度 × 湿度（°F）',
+    heatmapUnitC: '按温度 × 湿度（°C）',
+    heatmapAria: '按温度和湿度划分的露点地图',
+    heatmapCorner: '湿度\\温度',
+    legend: ['干燥', '舒适', '黏热', '闷热'],
+    privacyTitle: '隐私说明',
+    privacyText: '如果启用访问日志，本页面可能会将你的 IP、浏览器信息和访问元数据发送到日志服务用于流量监控。',
+    footerText: '露点反映空气中的实际水汽含量。对户外运动来说，它通常比相对湿度更能预测舒适度。',
+    languageToggle: 'EN',
+    languageToggleAria: '切换到英文',
+    comfortDp: { dry: '干燥', comfortable: '舒适', pleasant: '宜人', noticeable: '明显', sticky: '黏热', oppressive: '闷热' },
+    comfortFl: { comfortable: '舒适', caution: '注意', danger: '危险', extreme: '极端' },
+    guidance: {
+      fast: { label: '绿灯', tag: '空气干爽', title: '非常适合户外训练', text: '空气清爽，汗液蒸发效率高。很适合轻松跑、训练课、长骑和徒步。', pace: '正常配速', hydration: '常规补水', exposure: '气候压力低' },
+      good: { label: '状态良好', tag: '舒适', title: '多数训练都合适', text: '湿度存在但仍可控。大多数人可正常训练，长时间训练时会有轻微额外负担。', pace: '正常到快 1%', hydration: '按口渴补水', exposure: '时段较佳' },
+      notice: { label: '控制强度', tag: '湿度明显', title: '注意水汽负荷', text: '你会开始明显感到空气潮湿。汗液蒸发减慢，长时间有氧会比温度显示更吃力。', pace: '放慢 1–3%', hydration: '带上补给', exposure: '阴凉更好' },
+      sticky: { label: '调整计划', tag: '空气黏热', title: '降低训练强度', text: '黏热空气会降低散热效率。缩短高质量训练，延长恢复，避免硬追平时配速。', pace: '放慢 3–6%', hydration: '补充电解质', exposure: '避开烈日时段' },
+      heat: { label: '高温警示', tag: '闷热', title: '选择更安全时段', text: '蒸发散热已明显受限。建议提前训练、缩短时长、降低强度，并留意热应激信号。', pace: '放慢 6–10%+', hydration: '水分 + 钠', exposure: '找阴凉/凉爽时段' },
+    },
+  },
+};
+
+function getCopy() {
+  return copy[language] || copy.en;
+}
 
 function fToC(tempF) {
   return (tempF - 32) * 5 / 9;
@@ -373,15 +504,63 @@ function toDisplayTemp(tempF, digits = 1) {
 }
 
 function applyUnitUI() {
+  const text = getCopy();
   const isCelsius = tempUnit === 'C';
   unitFButton.classList.toggle('active', !isCelsius);
   unitCButton.classList.toggle('active', isCelsius);
   unitFButton.setAttribute('aria-pressed', String(!isCelsius));
   unitCButton.setAttribute('aria-pressed', String(isCelsius));
-  tempMinLabel.textContent = `Cool ${toDisplayTemp(+tempSlider.min, 0)}`;
-  tempMaxLabel.textContent = `Hot ${toDisplayTemp(+tempSlider.max, 0)}`;
-  heatmapUnitLabel.textContent = isCelsius ? '°C by temperature × humidity' : '°F by temperature × humidity';
-  tempSlider.setAttribute('aria-label', isCelsius ? 'Air temperature in Celsius' : 'Air temperature in Fahrenheit');
+  tempMinLabel.textContent = `${text.cool} ${toDisplayTemp(+tempSlider.min, 0)}`;
+  tempMaxLabel.textContent = `${text.hot} ${toDisplayTemp(+tempSlider.max, 0)}`;
+  heatmapUnitLabel.textContent = isCelsius ? text.heatmapUnitC : text.heatmapUnitF;
+  tempSlider.setAttribute('aria-label', isCelsius ? `${text.airTemperature} (°C)` : `${text.airTemperature} (°F)`);
+  rhSlider.setAttribute('aria-label', text.humidity);
+}
+
+function applyLanguage() {
+  const text = getCopy();
+  document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+  kickerText.textContent = text.kicker;
+  heroTitle.textContent = text.heroTitle;
+  heroSubtitle.textContent = text.heroSubtitle;
+  chipTexts.forEach((chip, index) => {
+    chip.textContent = text.chips[index] || chip.textContent;
+  });
+  conditionsTitle.textContent = text.conditionsTitle;
+  unitHint.textContent = text.unitHint;
+  airTempLabel.textContent = text.airTemperature;
+  humidityLabel.textContent = text.humidity;
+  humidityMinLabel.textContent = `${text.dry} 10%`;
+  humidityMaxLabel.textContent = `${text.steam} 95%`;
+  dewPointMetricLabel.textContent = text.dewPoint;
+  feelsLikeMetricLabel.textContent = text.feelsLike;
+  moistureSubLabel.textContent = text.moistureLoad;
+  heatIndexSubLabel.textContent = text.heatIndex;
+  trainingGuidanceLabel.textContent = text.trainingGuidance;
+  paceLabel.textContent = text.pace;
+  hydrationLabel.textContent = text.hydration;
+  exposureLabel.textContent = text.exposure;
+  dewPointMapTitle.textContent = text.dewPointMap;
+  legendTexts.forEach((node, index) => {
+    node.textContent = text.legend[index] || node.textContent;
+  });
+  privacyTitle.textContent = text.privacyTitle;
+  privacyText.textContent = text.privacyText;
+  footerText.textContent = text.footerText;
+  heatmapEl.setAttribute('aria-label', text.heatmapAria);
+  languageToggle.textContent = text.languageToggle;
+  languageToggle.setAttribute('aria-label', text.languageToggleAria);
+  applyUnitUI();
+  buildHeatmap();
+  update();
+}
+
+function setLanguage(nextLang) {
+  language = nextLang === 'zh' ? 'zh' : 'en';
+  try {
+    localStorage.setItem('temperature-ui-language', language);
+  } catch {}
+  applyLanguage();
 }
 
 function setTempUnit(unit) {
@@ -416,19 +595,21 @@ function calcHeatIndex(T, RH) {
 }
 
 function dpComfort(dp) {
-  if (dp < 50) return { label: 'Dry', color: '#38BDF8' };
-  if (dp < 55) return { label: 'Comfortable', color: '#22C55E' };
-  if (dp < 60) return { label: 'Pleasant', color: '#84CC16' };
-  if (dp < 65) return { label: 'Noticeable', color: '#FACC15' };
-  if (dp < 70) return { label: 'Sticky', color: '#FB923C' };
-  return { label: 'Oppressive', color: '#F87171' };
+  const labels = getCopy().comfortDp;
+  if (dp < 50) return { label: labels.dry, color: '#38BDF8' };
+  if (dp < 55) return { label: labels.comfortable, color: '#22C55E' };
+  if (dp < 60) return { label: labels.pleasant, color: '#84CC16' };
+  if (dp < 65) return { label: labels.noticeable, color: '#FACC15' };
+  if (dp < 70) return { label: labels.sticky, color: '#FB923C' };
+  return { label: labels.oppressive, color: '#F87171' };
 }
 
 function flComfort(fl) {
-  if (fl < 80) return { label: 'Comfortable', color: '#22C55E' };
-  if (fl < 90) return { label: 'Caution', color: '#FACC15' };
-  if (fl < 105) return { label: 'Danger', color: '#FB923C' };
-  return { label: 'Extreme', color: '#F87171' };
+  const labels = getCopy().comfortFl;
+  if (fl < 80) return { label: labels.comfortable, color: '#22C55E' };
+  if (fl < 90) return { label: labels.caution, color: '#FACC15' };
+  if (fl < 105) return { label: labels.danger, color: '#FB923C' };
+  return { label: labels.extreme, color: '#F87171' };
 }
 
 function cellColor(dp) {
@@ -441,38 +622,29 @@ function cellColor(dp) {
 }
 
 function getGuidance(dp, fl) {
+  const g = getCopy().guidance;
   if (dp < 55 && fl < 82) {
     return {
-      icon: '🟢', label: 'Green light', tag: 'Fast air', title: 'Great outdoor window',
-      text: 'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.',
-      pace: 'Normal pace', hydration: 'Normal fluids', exposure: 'Low climate stress', color: '#22C55E'
+      icon: '🟢', ...g.fast, color: '#22C55E'
     };
   }
   if (dp < 60 && fl < 86) {
     return {
-      icon: '🟢', label: 'Good to go', tag: 'Comfortable', title: 'Comfortable for most sessions',
-      text: 'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.',
-      pace: 'Normal to +1%', hydration: 'Drink to thirst', exposure: 'Good window', color: '#84CC16'
+      icon: '🟢', ...g.good, color: '#84CC16'
     };
   }
   if (dp < 65 && fl < 92) {
     return {
-      icon: '🟡', label: 'Manage effort', tag: 'Noticeable humidity', title: 'Respect the moisture load',
-      text: 'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.',
-      pace: 'Back off 1–3%', hydration: 'Bring fluids', exposure: 'Shade helps', color: '#FACC15'
+      icon: '🟡', ...g.notice, color: '#FACC15'
     };
   }
   if (dp < 70 && fl < 100) {
     return {
-      icon: '🟠', label: 'Adjust plan', tag: 'Sticky air', title: 'Dial down intensity',
-      text: 'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.',
-      pace: 'Back off 3–6%', hydration: 'Plan electrolytes', exposure: 'Avoid peak sun', color: '#FB923C'
+      icon: '🟠', ...g.sticky, color: '#FB923C'
     };
   }
   return {
-    icon: '🔴', label: 'Heat caution', tag: 'Oppressive', title: 'Choose safer timing',
-    text: 'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.',
-    pace: 'Back off 6–10%+', hydration: 'Fluids + sodium', exposure: 'Seek shade/cooler time', color: '#F87171'
+    icon: '🔴', ...g.heat, color: '#F87171'
   };
 }
 
@@ -485,7 +657,7 @@ function setSliderProgress(slider) {
 }
 
 function buildHeatmap() {
-  let html = '<thead><tr><th>RH\\T</th>';
+  let html = `<thead><tr><th>${getCopy().heatmapCorner}</th>`;
   heatmapTemps.forEach(t => html += `<th>${tempUnit === 'C' ? formatTemp(fToC(t), 0) : t}°</th>`);
   html += '</tr></thead><tbody>';
   heatmapRHs.forEach(r => {
@@ -558,15 +730,20 @@ tempSlider.addEventListener('input', update);
 rhSlider.addEventListener('input', update);
 unitFButton.addEventListener('click', () => setTempUnit('F'));
 unitCButton.addEventListener('click', () => setTempUnit('C'));
+languageToggle.addEventListener('click', () => setLanguage(language === 'en' ? 'zh' : 'en'));
 try {
   const savedUnit = localStorage.getItem('temperature-ui-unit');
   if (savedUnit === 'C' || savedUnit === 'F') {
     tempUnit = savedUnit;
   }
+  const savedLang = localStorage.getItem('temperature-ui-language');
+  if (savedLang === 'zh' || savedLang === 'en') {
+    language = savedLang;
+  } else if (/zh/i.test(navigator.language || '')) {
+    language = 'zh';
+  }
 } catch {}
-applyUnitUI();
-buildHeatmap();
-update();
+applyLanguage();
 </script>
 <script src="./visit-logger.js" defer></script>
 </body>
