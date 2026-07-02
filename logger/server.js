@@ -70,23 +70,37 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/log-visit', (req, res) => {
-  const event = {
+function buildVisitEvent(req, transport) {
+  return {
     ip: getClientIp(req),
     receivedAt: new Date().toISOString(),
-    page: req.body?.page || null,
-    title: req.body?.title || null,
-    referrer: req.body?.referrer || null,
-    userAgent: req.body?.userAgent || req.headers['user-agent'] || null,
-    language: req.body?.language || null,
-    screen: req.body?.screen || null,
-    viewport: req.body?.viewport || null,
-    timezone: req.body?.timezone || null,
-    visitedAt: req.body?.visitedAt || null,
+    transport,
+    page: req.body?.page || req.query?.page || null,
+    title: req.body?.title || req.query?.title || null,
+    referrer: req.body?.referrer || req.query?.referrer || null,
+    userAgent: req.body?.userAgent || req.query?.userAgent || req.headers['user-agent'] || null,
+    language: req.body?.language || req.query?.language || null,
+    screen: req.body?.screen || req.query?.screen || null,
+    viewport: req.body?.viewport || req.query?.viewport || null,
+    timezone: req.body?.timezone || req.query?.timezone || null,
+    visitedAt: req.body?.visitedAt || req.query?.visitedAt || null,
   };
+}
+
+function appendVisit(req, transport) {
+  const event = buildVisitEvent(req, transport);
 
   fs.appendFileSync(logFile, JSON.stringify(event) + '\n', 'utf8');
+}
+
+app.post('/api/log-visit', (req, res) => {
+  appendVisit(req, 'post');
   res.status(202).json({ ok: true });
+});
+
+app.get('/api/log-visit', (req, res) => {
+  appendVisit(req, 'get');
+  res.status(204).end();
 });
 
 app.get('/admin/recent', (req, res) => {
