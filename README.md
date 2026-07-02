@@ -130,6 +130,13 @@ This README documents the actions taken and commands used during the session.
 ## Live site
 - https://debeerswang.github.io/temperature/
 
+## Current Logging Architecture
+
+- Frontend portal emits visit events to the Render logger endpoint.
+- Logger service runs from `logger/` and stores events in PostgreSQL when `DATABASE_URL` is configured.
+- If `DATABASE_URL` is absent, logger falls back to local JSONL file storage.
+- Admin endpoint for recent logs: `GET /admin/recent` (protected by `ADMIN_TOKEN`).
+
 ## Summary of actions performed
 
 1. Located an unexpected Git repository at the workspace root (`/Users/debeerswang/Documents/Code/.git`). Backed it up:
