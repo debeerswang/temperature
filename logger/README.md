@@ -7,6 +7,7 @@ This service records page views for the published Temperature page and captures 
 - Accepts `POST /api/log-visit`
 - Determines the visitor IP from `X-Forwarded-For` or the socket remote address
 - Appends each visit as one JSON line to `logger/data/visits.jsonl`
+- Exposes `GET /admin/recent` for viewing recent activity (requires `ADMIN_TOKEN`)
 
 ## Start locally
 
@@ -47,6 +48,32 @@ Allowed origins are controlled by `ALLOWED_ORIGINS`:
 
 ```bash
 ALLOWED_ORIGINS="https://debeerswang.github.io,http://localhost:3000" npm start
+```
+
+## View recent activity logs
+
+Set an admin token in your environment and restart the service:
+
+```bash
+ADMIN_TOKEN="replace-with-a-long-random-secret" npm start
+```
+
+Then fetch recent events (latest first):
+
+```bash
+curl "http://localhost:8787/admin/recent?token=replace-with-a-long-random-secret&limit=50"
+```
+
+For the deployed Render service:
+
+```bash
+curl "https://temperature-visit-logger.onrender.com/admin/recent?token=replace-with-a-long-random-secret&limit=50"
+```
+
+You can also pass the token with an Authorization header:
+
+```bash
+curl -H "Authorization: Bearer replace-with-a-long-random-secret" "https://temperature-visit-logger.onrender.com/admin/recent?limit=50"
 ```
 
 ## Privacy note
