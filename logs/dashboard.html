@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Temperature Logs Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --border: #dbe4ee;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: radial-gradient(circle at top right, #dff7f3, var(--bg) 45%); }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 24px; }
+    .hero { background: linear-gradient(120deg, #0f766e, #0ea5a3); color: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(15,118,110,0.25); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.6rem; }
+    .hero p { margin: 0; opacity: 0.95; }
+    .controls { margin-top: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+    .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .control label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+    .control input { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 9px; }
+    .control-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    button { border: 1px solid transparent; border-radius: 10px; padding: 9px 12px; cursor: pointer; font-weight: 600; }
+    button.primary { background: #0f766e; color: #fff; }
+    button.secondary { background: #fff; color: var(--ink); border-color: var(--border); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status { margin-top: 8px; font-size: 0.86rem; color: var(--muted); min-height: 1.2em; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 18px 0; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+    .card .label { color: var(--muted); font-size: 0.85rem; }
+    .card .value { margin-top: 4px; font-size: 1.35rem; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+    .panel h2 { margin: 0 0 10px; font-size: 1.05rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #edf2f7; }
+    th { color: var(--muted); font-weight: 600; }
+    .bar { height: 8px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+    .bar > i { display: block; height: 8px; background: var(--accent); }
+    .event-list { max-height: 480px; overflow: auto; }
+    .event { border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; background: #fff; }
+    .event .meta { color: var(--muted); font-size: 0.82rem; margin-bottom: 4px; }
+    .event code { font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Temperature Visit Logs Dashboard</h1>
+      <p>Combined and deduplicated insights from all JSON snapshots in the logs folder.</p>
+    </section>
+
+    <section class="controls">
+      <div class="control-grid">
+        <div class="control">
+          <label for="endpoint">Admin endpoint</label>
+          <input id="endpoint" value="https://temperature-visit-logger.onrender.com/admin/recent" />
+        </div>
+        <div class="control">
+          <label for="token">ADMIN_TOKEN (for refresh)</label>
+          <input id="token" type="password" placeholder="Enter token" />
+        </div>
+        <div class="control">
+          <label for="limit">Limit</label>
+          <input id="limit" type="number" min="1" max="1000" value="200" />
+        </div>
+      </div>
+      <div class="control-actions">
+        <button id="refreshBtn" class="primary">Refresh From Server</button>
+        <button id="downloadBtn" class="secondary">Download Snapshot JSON</button>
+        <button id="saveBtn" class="secondary">Save Snapshot To Folder</button>
+      </div>
+      <div id="status" class="status"></div>
+    </section>
+
+    <section id="cards" class="cards"></section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Top IPs</h2>
+        <div id="topIPs"></div>
+      </article>
+      <article class="panel">
+        <h2>Top Pages</h2>
+        <div id="topPages"></div>
+      </article>
+      <article class="panel">
+        <h2>Transport Breakdown</h2>
+        <div id="transportBreakdown"></div>
+      </article>
+      <article class="panel">
+        <h2>Device Breakdown</h2>
+        <div id="deviceBreakdown"></div>
+      </article>
+      <article class="panel">
+        <h2>Top Languages</h2>
+        <div id="topLanguages"></div>
+      </article>
+      <article class="panel">
+        <h2>Top Timezones</h2>
+        <div id="topTimezones"></div>
+      </article>
+      <article class="panel">
+        <h2>Daily Breakdown</h2>
+        <div id="dailyBreakdown"></div>
+      </article>
+      <article class="panel">
+        <h2>Hourly Breakdown (UTC)</h2>
+        <div id="hourlyBreakdown"></div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:14px">
+      <h2>Recent Deduplicated Events</h2>
+      <div id="events" class="event-list"></div>
+    </section>
+  </div>
+
+  <script id="dashboard-data" type="application/json">{"summary": {"generatedAt": "2026-07-02T23:42:09.978933+00:00", "filesProcessed": ["recent_20260702_101135.json", "recent_20260702_101204.json", "recent_20260702_125223.json", "recent_20260702_144133.json", "recent_20260702_144520.json", "recent_20260702_145157.json", "recent_20260702_181209.json", "recent_20260702_182547.json", "recent_20260702_183531.json"], "rawEventCount": 102, "uniqueEventCount": 19, "duplicatesRemoved": 83, "timeRange": {"earliestReceivedAt": "2026-07-02T04:07:00.318000+00:00", "latestReceivedAt": "2026-07-02T23:34:50.904000+00:00"}, "topIPs": [{"label": "174.200.1.212", "count": 4}, {"label": "68.63.220.95", "count": 3}, {"label": "66.33.10.115", "count": 2}, {"label": "73.65.7.13", "count": 2}, {"label": "66.41.6.201", "count": 2}, {"label": "75.72.1.232", "count": 1}, {"label": "134.204.182.68", "count": 1}, {"label": "172.58.13.209", "count": 1}, {"label": "73.62.157.238", "count": 1}, {"label": "134.204.180.71", "count": 1}], "topPages": [{"label": "/temperature/", "count": 19}], "topLanguages": [{"label": "en-US", "count": 16}, {"label": "zh-CN", "count": 2}, {"label": "en", "count": 1}], "topTimezones": [{"label": "America/Chicago", "count": 18}, {"label": "Asia/Bangkok", "count": 1}], "transportBreakdown": [{"label": "get", "count": 16}, {"label": "post", "count": 3}], "deviceBreakdown": [{"label": "mobile", "count": 16}, {"label": "desktop", "count": 3}], "hourlyBreakdown": [{"label": "19:00 UTC", "count": 7}, {"label": "04:00 UTC", "count": 6}, {"label": "23:00 UTC", "count": 3}, {"label": "21:00 UTC", "count": 2}, {"label": "14:00 UTC", "count": 1}], "dailyBreakdown": [{"label": "2026-07-02", "count": 19}]}, "events": [{"ip": "68.63.220.95", "receivedAt": "2026-07-02T23:34:50.904Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "402x874", "viewport": "402x774", "timezone": "America/Chicago", "visitedAt": "2026-07-02T23:34:50.695Z"}, {"ip": "75.72.1.232", "receivedAt": "2026-07-02T23:25:58.359Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/en", "language": "en-US", "screen": "428x926", "viewport": "428x835", "timezone": "America/Chicago", "visitedAt": "2026-07-02T23:25:58.115Z"}, {"ip": "134.204.182.68", "receivedAt": "2026-07-02T23:25:28.831Z", "transport": "post", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0", "language": "en-US", "screen": "2560x1440", "viewport": "2552x1274", "timezone": "Asia/Bangkok", "visitedAt": "2026-07-02T23:25:27.680Z"}, {"ip": "66.33.10.115", "receivedAt": "2026-07-02T21:39:51.341Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.37(0x1800252f) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "375x812", "viewport": "375x721", "timezone": "America/Chicago", "visitedAt": "2026-07-02T21:39:51.202Z"}, {"ip": "66.33.10.115", "receivedAt": "2026-07-02T21:38:37.513Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.37(0x1800252f) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "375x812", "viewport": "375x721", "timezone": "America/Chicago", "visitedAt": "2026-07-02T21:38:25.218Z"}, {"ip": "172.58.13.209", "receivedAt": "2026-07-02T19:57:54.597Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (Linux; Android 16; Pixel 9 Pro Build/CP1A.260505.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.179 Mobile Safari/537.36 XWEB/1380083 MMWEBSDK/20260201 MMWEBID/5162 REV/b1c4b8e6ddf8551dadd6517e0d3684735c187751 MicroMessenger/8.0.69.3022(0x28004542) WeChat/arm64 Weixin GPVersion/1 NetType/5G Language/en ABI/arm64", "language": "en", "screen": "440x982", "viewport": "440x863", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:57:56.802Z"}, {"ip": "73.62.157.238", "receivedAt": "2026-07-02T19:56:49.262Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/en", "language": "en-US", "screen": "390x844", "viewport": "390x753", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:56:48.987Z"}, {"ip": "73.65.7.13", "receivedAt": "2026-07-02T19:51:43.338Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Mobile/15E148 Safari/604.1", "language": "en-US", "screen": "414x896", "viewport": "428x745", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:51:43.218Z"}, {"ip": "73.65.7.13", "receivedAt": "2026-07-02T19:50:14.120Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": "https://weixin110.qq.com/", "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "428x926", "viewport": "428x752", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:50:13.950Z"}, {"ip": "68.63.220.95", "receivedAt": "2026-07-02T19:44:52.063Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "402x874", "viewport": "402x774", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:44:51.991Z"}, {"ip": "134.204.180.71", "receivedAt": "2026-07-02T19:44:31.866Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": "https://weixin110.qq.com/", "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/zh_CN", "language": "zh-CN", "screen": "430x932", "viewport": "430x751", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:44:31.441Z"}, {"ip": "68.63.220.95", "receivedAt": "2026-07-02T19:43:47.715Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/WIFI Language/zh_CN", "language": "en-US", "screen": "402x874", "viewport": "402x774", "timezone": "America/Chicago", "visitedAt": "2026-07-02T19:43:47.391Z"}, {"ip": "174.234.144.136", "receivedAt": "2026-07-02T14:05:57.911Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": "https://weixin110.qq.com/", "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b30) NetType/4G Language/zh_CN", "language": "zh-CN", "screen": "430x932", "viewport": "430x751", "timezone": "America/Chicago", "visitedAt": "2026-07-02T14:05:46.474Z"}, {"ip": "174.200.1.212", "receivedAt": "2026-07-02T04:10:08.906Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1", "language": "en-US", "screen": "430x932", "viewport": "430x775", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:10:08.811Z"}, {"ip": "174.200.1.212", "receivedAt": "2026-07-02T04:10:07.885Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1", "language": "en-US", "screen": "430x932", "viewport": "430x775", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:10:07.716Z"}, {"ip": "66.41.6.201", "receivedAt": "2026-07-02T04:07:26.967Z", "transport": "post", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", "language": "en-US", "screen": "1710x1112", "viewport": "1710x900", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:07:26.874Z"}, {"ip": "66.41.6.201", "receivedAt": "2026-07-02T04:07:25.509Z", "transport": "post", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", "language": "en-US", "screen": "1710x1112", "viewport": "1710x900", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:07:25.356Z"}, {"ip": "174.200.1.212", "receivedAt": "2026-07-02T04:07:02.103Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1", "language": "en-US", "screen": "430x932", "viewport": "430x775", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:07:02.023Z"}, {"ip": "174.200.1.212", "receivedAt": "2026-07-02T04:07:00.318Z", "transport": "get", "page": "/temperature/", "title": "Outdoor Comfort Index", "referrer": null, "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1", "language": "en-US", "screen": "430x932", "viewport": "430x775", "timezone": "America/Chicago", "visitedAt": "2026-07-02T04:07:00.006Z"}]}</script>
+  <script>
+    const payload = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const state = {
+      events: payload.events || [],
+      rawEventCount: payload.summary?.rawEventCount || (payload.events || []).length,
+      filesProcessed: payload.summary?.filesProcessed || [],
+      latestSnapshot: null,
+    };
+
+    function canonicalize(value) {
+      if (Array.isArray(value)) {
+        return value.map(canonicalize);
+      }
+      if (value && typeof value === 'object') {
+        const sorted = {};
+        Object.keys(value).sort().forEach((key) => {
+          sorted[key] = canonicalize(value[key]);
+        });
+        return sorted;
+      }
+      return value;
+    }
+
+    function dedupeEvents(events) {
+      const seen = new Set();
+      const unique = [];
+      let duplicates = 0;
+
+      for (const event of events) {
+        const key = JSON.stringify(canonicalize(event));
+        if (seen.has(key)) {
+          duplicates += 1;
+          continue;
+        }
+        seen.add(key);
+        unique.push(event);
+      }
+      return { unique, duplicates };
+    }
+
+    function classifyDevice(userAgent) {
+      const ua = (userAgent || '').toLowerCase();
+      if (['iphone', 'android', 'mobile', 'wechat', 'micromessenger'].some((t) => ua.includes(t))) return 'mobile';
+      if (['ipad', 'tablet'].some((t) => ua.includes(t))) return 'tablet';
+      if (ua) return 'desktop';
+      return 'unknown';
+    }
+
+    function topItems(counter, limit = 10) {
+      return Array.from(counter.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(([label, count]) => ({ label, count }));
+    }
+
+    function parseTime(ts) {
+      if (!ts) return null;
+      const t = new Date(ts);
+      return Number.isNaN(t.getTime()) ? null : t;
+    }
+
+    function sortEventsByReceivedAtDesc(events) {
+      return [...events].sort((left, right) => {
+        const leftTime = parseTime(left.receivedAt)?.getTime() || 0;
+        const rightTime = parseTime(right.receivedAt)?.getTime() || 0;
+        return rightTime - leftTime;
+      });
+    }
+
+    function computeSummary(files, rawEvents, uniqueEvents, duplicatesRemoved) {
+      const ip = new Map();
+      const page = new Map();
+      const lang = new Map();
+      const tz = new Map();
+      const transport = new Map();
+      const device = new Map();
+      const hourly = new Map();
+      const daily = new Map();
+      const times = [];
+
+      for (const event of uniqueEvents) {
+        const add = (map, key) => map.set(key, (map.get(key) || 0) + 1);
+        add(ip, event.ip || 'unknown');
+        add(page, event.page || 'unknown');
+        add(lang, event.language || 'unknown');
+        add(tz, event.timezone || 'unknown');
+        add(transport, event.transport || 'unknown');
+        add(device, classifyDevice(event.userAgent));
+
+        const t = parseTime(event.receivedAt);
+        if (t) {
+          times.push(t);
+          add(hourly, `${String(t.getUTCHours()).padStart(2, '0')}:00 UTC`);
+          add(daily, t.toISOString().slice(0, 10));
+        }
+      }
+
+      times.sort((a, b) => a - b);
+
+      return {
+        filesProcessed: files,
+        rawEventCount: rawEvents.length,
+        uniqueEventCount: uniqueEvents.length,
+        duplicatesRemoved,
+        timeRange: {
+          earliestReceivedAt: times[0] ? times[0].toISOString() : null,
+          latestReceivedAt: times[times.length - 1] ? times[times.length - 1].toISOString() : null,
+        },
+        topIPs: topItems(ip),
+        topPages: topItems(page),
+        topLanguages: topItems(lang),
+        topTimezones: topItems(tz),
+        transportBreakdown: topItems(transport),
+        deviceBreakdown: topItems(device),
+        hourlyBreakdown: topItems(hourly, 24),
+        dailyBreakdown: topItems(daily, 30),
+      };
+    }
+
+    function renderTable(targetId, rows) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = '';
+      const max = Math.max(1, ...rows.map(r => r.count));
+      const table = document.createElement('table');
+      table.innerHTML = '<thead><tr><th>Label</th><th>Count</th><th>Share</th></tr></thead>';
+      const tbody = document.createElement('tbody');
+      rows.forEach((row) => {
+        const tr = document.createElement('tr');
+        const pct = Math.round((row.count / max) * 100);
+        tr.innerHTML = `<td>${row.label}</td><td>${row.count}</td><td><div class="bar"><i style="width:${pct}%"></i></div></td>`;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      target.appendChild(table);
+    }
+
+    function renderDashboard(summary, events) {
+      const sortedEvents = sortEventsByReceivedAtDesc(events);
+      const cardData = [
+        ['Files', summary.filesProcessed.length],
+        ['Raw Events', summary.rawEventCount],
+        ['Unique Events', summary.uniqueEventCount],
+        ['Duplicates Removed', summary.duplicatesRemoved],
+        ['Earliest', summary.timeRange.earliestReceivedAt || 'N/A'],
+        ['Latest', summary.timeRange.latestReceivedAt || 'N/A']
+      ];
+
+      const cards = document.getElementById('cards');
+      cards.innerHTML = '';
+      cardData.forEach(([label, value]) => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+        cards.appendChild(card);
+      });
+
+      ['topIPs', 'topPages', 'topLanguages', 'topTimezones', 'transportBreakdown', 'deviceBreakdown', 'dailyBreakdown', 'hourlyBreakdown']
+        .forEach((key) => renderTable(key, summary[key] || []));
+
+      const eventsWrap = document.getElementById('events');
+      eventsWrap.innerHTML = '';
+      sortedEvents.forEach((event) => {
+        const item = document.createElement('div');
+        item.className = 'event';
+        item.innerHTML = `
+          <div class="meta">${event.receivedAt || 'unknown time'} | ${event.ip || 'unknown ip'} | ${event.transport || 'unknown transport'}</div>
+          <div><strong>${event.title || '(no title)'}</strong> on <code>${event.page || 'unknown page'}</code></div>
+          <div class="meta">lang=${event.language || 'n/a'} timezone=${event.timezone || 'n/a'}</div>
+        `;
+        eventsWrap.appendChild(item);
+      });
+    }
+
+    function timestampName() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      return `recent_${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}_${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}.json`;
+    }
+
+    function setStatus(text, isError = false) {
+      const el = document.getElementById('status');
+      el.textContent = text;
+      el.style.color = isError ? '#b91c1c' : 'var(--muted)';
+    }
+
+    function downloadSnapshot(snapshot, fileName) {
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function saveSnapshotToFolder(snapshot, fileName) {
+      if (!window.showDirectoryPicker) {
+        throw new Error('Folder save is not supported in this browser. Use Download Snapshot JSON.');
+      }
+      const dir = await window.showDirectoryPicker();
+      const handle = await dir.getFileHandle(fileName, { create: true });
+      const writable = await handle.createWritable();
+      await writable.write(JSON.stringify(snapshot, null, 2));
+      await writable.close();
+    }
+
+    async function refreshFromServer() {
+      const endpoint = document.getElementById('endpoint').value.trim();
+      const token = document.getElementById('token').value.trim();
+      const limit = document.getElementById('limit').value.trim() || '200';
+      const btn = document.getElementById('refreshBtn');
+
+      if (!endpoint || !token) {
+        setStatus('Endpoint and ADMIN_TOKEN are required to refresh.', true);
+        return;
+      }
+
+      btn.disabled = true;
+      setStatus('Refreshing from server...');
+      try {
+        const url = `${endpoint}?limit=${encodeURIComponent(limit)}`;
+        const resp = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!resp.ok) {
+          const body = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${body.slice(0, 180)}`);
+        }
+        const data = await resp.json();
+        const serverEvents = Array.isArray(data.events) ? data.events : [];
+        const merged = [...state.events, ...serverEvents];
+        const deduped = dedupeEvents(merged);
+        const sortedUnique = sortEventsByReceivedAtDesc(deduped.unique);
+
+        state.events = sortedUnique;
+        state.rawEventCount = merged.length;
+        state.latestSnapshot = {
+          ok: true,
+          count: serverEvents.length,
+          events: sortEventsByReceivedAtDesc(serverEvents),
+        };
+
+        const summary = computeSummary(
+          [...state.filesProcessed, '(manual refresh)'],
+          merged,
+          sortedUnique,
+          deduped.duplicates
+        );
+        renderDashboard(summary, sortedUnique);
+        setStatus(`Refresh complete. Pulled ${serverEvents.length} events and deduplicated to ${sortedUnique.length}.`);
+      } catch (err) {
+        setStatus(`Refresh failed: ${err.message}`, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refreshFromServer);
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const snapshot = state.latestSnapshot || { ok: true, count: state.events.length, events: state.events };
+      const name = timestampName();
+      downloadSnapshot(snapshot, name);
+      setStatus(`Downloaded ${name}. Move it into logs folder if needed.`);
+    });
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const snapshot = state.latestSnapshot || { ok: true, count: state.events.length, events: state.events };
+      const name = timestampName();
+      try {
+        await saveSnapshotToFolder(snapshot, name);
+        setStatus(`Saved ${name} to selected folder.`);
+      } catch (err) {
+        setStatus(`Save failed: ${err.message}`, true);
+      }
+    });
+
+    renderDashboard(payload.summary, state.events);
+    setStatus('Loaded local snapshots. Use Refresh From Server to repopulate JSON snapshots manually.');
+  </script>
+</body>
+</html>

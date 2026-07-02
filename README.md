@@ -136,6 +136,7 @@ This README documents the actions taken and commands used during the session.
 - Logger service runs from `logger/` and stores events in PostgreSQL when `DATABASE_URL` is configured.
 - If `DATABASE_URL` is absent, logger falls back to local JSONL file storage.
 - Admin endpoint for recent logs: `GET /admin/recent` (protected by `ADMIN_TOKEN`).
+- Local dashboard instructions: [logs/README.md](logs/README.md)
 
 ## Summary of actions performed
 
