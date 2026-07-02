@@ -5,139 +5,327 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Climate Comfort">
-<meta name="theme-color" content="#0F172A">
-<title>Climate Comfort</title>
+<meta name="apple-mobile-web-app-title" content="Outdoor Comfort">
+<meta name="theme-color" content="#08111F">
+<meta name="description" content="Outdoor comfort tool for runners, riders, hikers, and active people. Explore how temperature, humidity, dew point, and heat index affect training comfort.">
+<meta name="visit-log-endpoint" content="http://localhost:8787/api/log-visit">
+<title>Outdoor Comfort Index</title>
 <style>
+  :root {
+    --bg: #08111F;
+    --panel: rgba(15, 23, 42, 0.76);
+    --panel-strong: rgba(15, 23, 42, 0.92);
+    --line: rgba(148, 163, 184, 0.18);
+    --muted: #94A3B8;
+    --text: #F8FAFC;
+    --soft: #CBD5E1;
+    --accent: #22C55E;
+    --accent-soft: rgba(34, 197, 94, 0.16);
+    --amber: #F59E0B;
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
   body {
-    background: #0F172A; color: #F1F5F9;
-    font-family: -apple-system, system-ui, 'Helvetica Neue', sans-serif;
-    padding: 0; min-height: 100vh; min-height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at 10% 5%, rgba(14, 165, 233, 0.26), transparent 32%),
+      radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.20), transparent 30%),
+      linear-gradient(180deg, #08111F 0%, #0F172A 48%, #111827 100%);
+    padding: 0;
     -webkit-text-size-adjust: 100%;
   }
-  .container { max-width: 520px; margin: 0 auto; padding: 48px 20px 32px; }
-  h1 { font-size: 22px; font-weight: 700; color: #F8FAFC; margin-bottom: 4px; }
-  .subtitle { font-size: 13px; color: #64748B; margin-bottom: 32px; }
-  .page-description {
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 24px;
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(140deg, rgba(255,255,255,0.06), transparent 26%),
+      repeating-linear-gradient(120deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 12px);
+    mask-image: linear-gradient(to bottom, black, transparent 78%);
   }
-  .page-description p { font-size: 13px; color: #CBD5E1; line-height: 1.6; }
-  .card { background: #1E293B; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-  .slider-group { margin-bottom: 20px; }
+
+  .container { width: min(100%, 760px); margin: 0 auto; padding: 24px 16px 34px; position: relative; }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 26px 22px 22px;
+    background:
+      linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.68)),
+      radial-gradient(circle at 80% 20%, rgba(250, 204, 21, 0.20), transparent 28%),
+      radial-gradient(circle at 20% 85%, rgba(14, 165, 233, 0.18), transparent 30%);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -54px;
+    top: -58px;
+    border-radius: 999px;
+    border: 24px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .hero-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; position: relative; z-index: 1; }
+  .kicker { display: inline-flex; align-items: center; gap: 8px; color: #BAE6FD; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  h1 { font-size: clamp(34px, 9vw, 56px); line-height: 0.95; letter-spacing: -0.06em; max-width: 560px; }
+  .subtitle { color: var(--soft); font-size: 15px; line-height: 1.55; margin-top: 14px; max-width: 610px; }
+
+  .readiness-orb {
+    min-width: 108px;
+    min-height: 108px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    border-radius: 28px;
+    background: linear-gradient(160deg, var(--accent-soft), rgba(255,255,255,0.04));
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+
+  .readiness-orb span { font-size: 30px; display: block; margin-bottom: 6px; }
+  .readiness-orb strong { color: var(--text); font-size: 12px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.07em; }
+
+  .activity-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; position: relative; z-index: 1; }
+  .chip { border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: #E2E8F0; border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 700; backdrop-filter: blur(12px); }
+
+  .panel,
+  .metric-card,
+  .guidance-card,
+  .map-card {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+    backdrop-filter: blur(18px);
+  }
+
+  .panel { padding: 18px; margin-bottom: 14px; }
+  .section-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .section-title h2 { font-size: 15px; letter-spacing: 0.02em; }
+  .section-title p { color: var(--muted); font-size: 12px; }
+
+  .slider-group { padding: 16px; border-radius: 20px; background: rgba(15, 23, 42, 0.72); border: 1px solid rgba(148, 163, 184, 0.12); margin-bottom: 12px; }
   .slider-group:last-child { margin-bottom: 0; }
-  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-  .slider-label { font-size: 13px; color: #94A3B8; }
-  .slider-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .slider-range { display: flex; justify-content: space-between; font-size: 10px; color: #475569; margin-top: 3px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .slider-label { color: #CBD5E1; font-size: 13px; font-weight: 750; }
+  .slider-value { color: white; font-size: 26px; font-weight: 900; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .slider-range { display: flex; justify-content: space-between; font-size: 11px; color: #64748B; margin-top: 8px; }
+
   input[type=range] {
-    -webkit-appearance: none; appearance: none;
-    width: 100%; height: 6px; border-radius: 3px;
-    background: #0F172A; outline: none; cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #38BDF8, #22C55E 50%, #F59E0B 72%, #EF4444);
+    outline: none;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
   }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 24px; height: 24px; border-radius: 50%;
-    background: #E2E8F0; border: 2px solid #475569; cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #F8FAFC;
+    border: 4px solid #0F172A;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.42), 0 0 0 2px rgba(255,255,255,0.25);
   }
-  .gauge { margin-bottom: 28px; }
-  .gauge:last-child { margin-bottom: 0; }
-  .gauge-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .gauge-label { font-size: 13px; color: #94A3B8; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
-  .gauge-value { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .gauge-unit { font-size: 14px; color: #94A3B8; font-weight: 400; }
-  .gauge-track { position: relative; height: 10px; border-radius: 5px; background: #0F172A; overflow: hidden; }
-  .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width 0.3s ease, background 0.3s ease; }
-  .gauge-footer { display: flex; justify-content: space-between; margin-top: 5px; }
-  .gauge-comfort { font-size: 12px; font-weight: 600; transition: color 0.3s ease; }
-  .gauge-sub { font-size: 11px; color: #64748B; }
-  .insight { border-radius: 10px; padding: 16px; margin-bottom: 28px; transition: all 0.3s ease; }
-  .insight p { font-size: 13px; color: #CBD5E1; line-height: 1.6; }
-  .heatmap-title { font-size: 14px; font-weight: 600; color: #94A3B8; margin-bottom: 12px; letter-spacing: 0.03em; }
-  .heatmap-wrap { overflow-x: auto; margin-bottom: 10px; }
-  table { border-collapse: collapse; width: 100%; font-size: 11px; text-align: center; }
-  th { padding: 6px 4px; color: #94A3B8; font-weight: 600; }
-  th:first-child { text-align: left; color: #64748B; font-weight: 500; }
-  td:first-child { text-align: left; color: #94A3B8; font-weight: 600; }
-  td { padding: 5px 3px; color: #E2E8F0; font-variant-numeric: tabular-nums; border-radius: 3px; border: 2px solid transparent; transition: all 0.2s; }
-  td.highlight { font-weight: 800; border-color: #F8FAFC; }
-  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 10px; color: #64748B; margin-bottom: 8px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
-  .footer-note { font-size: 11px; color: #475569; margin-top: 24px; line-height: 1.5; }
+  input[type=range]::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #F8FAFC;
+    border: 4px solid #0F172A;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.42), 0 0 0 2px rgba(255,255,255,0.25);
+  }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .metric-card { padding: 18px; overflow: hidden; position: relative; }
+  .metric-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0%, var(--accent-soft), transparent 38%); pointer-events: none; }
+  .metric-label { color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; position: relative; }
+  .metric-value { font-size: clamp(34px, 12vw, 52px); line-height: 1; font-weight: 950; letter-spacing: -0.07em; font-variant-numeric: tabular-nums; position: relative; }
+  .metric-unit { font-size: 16px; color: var(--muted); letter-spacing: 0; margin-left: 2px; }
+  .gauge-track { position: relative; height: 11px; border-radius: 999px; background: rgba(15, 23, 42, 0.92); overflow: hidden; margin: 14px 0 9px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+  .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.35s ease, background 0.35s ease; }
+  .metric-footer { display: flex; justify-content: space-between; gap: 10px; align-items: center; position: relative; }
+  .gauge-comfort { font-size: 13px; font-weight: 850; transition: color 0.3s ease; }
+  .gauge-sub { color: #64748B; font-size: 11px; text-align: right; }
+
+  .guidance-card { padding: 18px; margin-bottom: 14px; background: linear-gradient(160deg, var(--panel-strong), rgba(15,23,42,0.70)); }
+  .guidance-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .status-pill { border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 900; color: white; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent), transparent 55%); }
+  .guidance-title { font-size: 25px; line-height: 1.05; letter-spacing: -0.04em; margin-bottom: 8px; }
+  .guidance-text { color: var(--soft); font-size: 14px; line-height: 1.55; }
+  .cue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .cue { padding: 12px; border-radius: 17px; background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.09); }
+  .cue-label { color: #94A3B8; font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .cue-value { color: #F8FAFC; font-size: 13px; line-height: 1.35; font-weight: 750; }
+
+  .map-card { padding: 18px; }
+  .heatmap-title { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 12px; }
+  .heatmap-title h2 { font-size: 15px; letter-spacing: 0.02em; }
+  .heatmap-title span { color: var(--muted); font-size: 11px; text-align: right; }
+  .heatmap-wrap { overflow-x: auto; padding-bottom: 2px; }
+  table { border-collapse: separate; border-spacing: 5px; width: 100%; min-width: 520px; font-size: 12px; text-align: center; }
+  th { padding: 8px 6px; color: #94A3B8; font-weight: 850; }
+  th:first-child { text-align: left; color: #64748B; }
+  td:first-child { text-align: left; color: #CBD5E1; font-weight: 900; background: transparent; box-shadow: none; }
+  td { padding: 9px 7px; color: #F8FAFC; font-variant-numeric: tabular-nums; border-radius: 10px; border: 2px solid transparent; transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.12); }
+  td.highlight { font-weight: 950; border-color: #FFFFFF; transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 22px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.22); }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #94A3B8; margin-top: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: rgba(255,255,255,0.05); }
+  .legend-dot { width: 11px; height: 11px; border-radius: 4px; display: inline-block; }
+  .privacy-note {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: rgba(15, 23, 42, 0.72);
+  }
+  .privacy-note strong { display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #E2E8F0; margin-bottom: 6px; }
+  .privacy-note p { color: #94A3B8; font-size: 12px; line-height: 1.5; }
+  .footer-note { color: #64748B; font-size: 12px; line-height: 1.55; margin-top: 18px; text-align: center; }
+
+  @media (max-width: 640px) {
+    .container { padding: 14px 12px 28px; }
+    .hero { border-radius: 24px; padding: 22px 18px 18px; }
+    .hero-top { display: block; }
+    .readiness-orb { min-height: 82px; min-width: 100%; grid-template-columns: auto 1fr; text-align: left; padding: 12px 14px; margin-top: 18px; }
+    .readiness-orb span { margin: 0 10px 0 0; }
+    .summary-grid, .cue-grid { grid-template-columns: 1fr; }
+    .guidance-header { align-items: flex-start; flex-direction: column; }
+    .metric-card, .panel, .guidance-card, .map-card { border-radius: 22px; }
+  }
 </style>
 </head>
 <body>
+<main class="container">
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="kicker">▲ Outdoor activity comfort</div>
+        <h1>Know the air before you move.</h1>
+        <p class="subtitle">A quick field guide for runners, cyclists, hikers, and race-day planners. Tune temperature and humidity to see dew point, heat index, and how hard the air will feel on your body.</p>
+      </div>
+      <div class="readiness-orb" aria-live="polite">
+        <span id="conditionIcon">🟢</span>
+        <strong id="readinessLabel">Green light</strong>
+      </div>
+    </div>
+    <div class="activity-row" aria-label="Outdoor activities">
+      <span class="chip">🏃 Run</span>
+      <span class="chip">🚴 Ride</span>
+      <span class="chip">🥾 Hike</span>
+      <span class="chip">🏁 Race day</span>
+      <span class="chip">💧 Sweat check</span>
+    </div>
+  </section>
 
-<div class="container">
-  <h1>Climate Comfort</h1>
-  <p class="subtitle">How temperature &amp; humidity shape what you feel</p>
-  <div class="page-description">
-    <p>This interactive page explains how air temperature and humidity combine to change comfort, perceived heat, and the body's ability to cool itself through sweat evaporation.</p>
-  </div>
-
-  <div class="card">
+  <section class="panel" aria-label="Weather inputs">
+    <div class="section-title">
+      <h2>Set the conditions</h2>
+      <p>Drag to simulate your workout window</p>
+    </div>
     <div class="slider-group">
       <div class="slider-header">
         <span class="slider-label">Air Temperature</span>
         <span class="slider-value" id="tempVal">74°F</span>
       </div>
-      <input type="range" id="tempSlider" min="60" max="100" value="74">
-      <div class="slider-range"><span>60°F</span><span>100°F</span></div>
+      <input type="range" id="tempSlider" min="60" max="100" value="74" aria-label="Air temperature in Fahrenheit">
+      <div class="slider-range"><span>Cool 60°F</span><span>Hot 100°F</span></div>
     </div>
     <div class="slider-group">
       <div class="slider-header">
         <span class="slider-label">Relative Humidity</span>
         <span class="slider-value" id="rhVal">67%</span>
       </div>
-      <input type="range" id="rhSlider" min="10" max="95" value="67">
-      <div class="slider-range"><span>10%</span><span>95%</span></div>
+      <input type="range" id="rhSlider" min="10" max="95" value="67" aria-label="Relative humidity percent">
+      <div class="slider-range"><span>Dry 10%</span><span>Steam 95%</span></div>
     </div>
-  </div>
+  </section>
 
-  <div class="card" style="padding-bottom:4px">
-    <div class="gauge">
-      <div class="gauge-header">
-        <span class="gauge-label">Dew Point</span>
-        <span class="gauge-value" id="dpValue">--<span class="gauge-unit">°F</span></span>
-      </div>
+  <section class="summary-grid" aria-label="Calculated comfort metrics">
+    <article class="metric-card">
+      <div class="metric-label">Dew point</div>
+      <div class="metric-value" id="dpValue">62.3<span class="metric-unit">°F</span></div>
       <div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div>
-      <div class="gauge-footer">
-        <span class="gauge-comfort" id="dpComfort">--</span>
-        <span class="gauge-sub">What your body feels</span>
+      <div class="metric-footer">
+        <span class="gauge-comfort" id="dpComfort">Noticeable</span>
+        <span class="gauge-sub">Moisture load</span>
       </div>
-    </div>
-    <div class="gauge">
-      <div class="gauge-header">
-        <span class="gauge-label">Feels Like</span>
-        <span class="gauge-value" id="flValue">--<span class="gauge-unit">°F</span></span>
-      </div>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Feels like</div>
+      <div class="metric-value" id="flValue">74.0<span class="metric-unit">°F</span></div>
       <div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div>
-      <div class="gauge-footer">
-        <span class="gauge-comfort" id="flComfort">--</span>
+      <div class="metric-footer">
+        <span class="gauge-comfort" id="flComfort">Comfortable</span>
         <span class="gauge-sub">Heat index</span>
       </div>
+    </article>
+  </section>
+
+  <section class="guidance-card" id="guidanceCard" aria-live="polite">
+    <div class="guidance-header">
+      <div>
+        <div class="metric-label">Training guidance</div>
+        <h2 class="guidance-title" id="guidanceTitle">Manage effort</h2>
+      </div>
+      <span class="status-pill" id="conditionTag">Noticeable humidity</span>
     </div>
-  </div>
+    <p class="guidance-text" id="guidanceText">You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.</p>
+    <div class="cue-grid">
+      <div class="cue">
+        <div class="cue-label">Pace</div>
+        <div class="cue-value" id="paceCue">Back off 1–3%</div>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Hydration</div>
+        <div class="cue-value" id="hydrationCue">Bring fluids for longer sessions</div>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Exposure</div>
+        <div class="cue-value" id="exposureCue">Shade helps</div>
+      </div>
+    </div>
+  </section>
 
-  <div class="insight" id="insight"><p id="insightText"></p></div>
-
-  <div class="heatmap-title">DEW POINT MAP — °F BY TEMP × RH</div>
-  <div class="heatmap-wrap">
-    <table id="heatmap"></table>
-  </div>
-  <div class="legend">
-    <span><span class="legend-dot" style="background:#1E3A5F"></span>Dry</span>
-    <span><span class="legend-dot" style="background:#065F46"></span>Comfortable</span>
-    <span><span class="legend-dot" style="background:#92400E"></span>Noticeable</span>
-    <span><span class="legend-dot" style="background:#991B1B"></span>Oppressive</span>
-  </div>
-
-  <p class="footer-note">Dew point = absolute moisture in air. RH is relative to temperature — same RH at different temps means different comfort. Your body responds to dew point.</p>
-</div>
+  <section class="map-card">
+    <div class="heatmap-title">
+      <h2>Dew point map</h2>
+      <span>°F by temperature × humidity</span>
+    </div>
+    <div class="heatmap-wrap">
+      <table id="heatmap" aria-label="Dew point map by temperature and humidity"></table>
+    </div>
+    <div class="legend">
+      <span><i class="legend-dot" style="background:#0EA5E9"></i>Dry</span>
+      <span><i class="legend-dot" style="background:#16A34A"></i>Comfortable</span>
+      <span><i class="legend-dot" style="background:#F59E0B"></i>Sticky</span>
+      <span><i class="legend-dot" style="background:#DC2626"></i>Oppressive</span>
+    </div>
+    <div class="privacy-note">
+      <strong>Privacy notice</strong>
+      <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
+    </div>
+    <p class="footer-note">Dew point tracks the actual moisture in the air. For outdoor activity, it often predicts comfort better than relative humidity alone.</p>
+  </section>
+</main>
 
 <script>
 const tempSlider = document.getElementById('tempSlider');
@@ -167,41 +355,77 @@ function calcHeatIndex(T, RH) {
 }
 
 function dpComfort(dp) {
-  if (dp < 50) return { label: 'Dry', color: '#3B82F6' };
-  if (dp < 55) return { label: 'Comfortable', color: '#10B981' };
-  if (dp < 60) return { label: 'Pleasant', color: '#6EE7B7' };
-  if (dp < 65) return { label: 'Noticeable', color: '#FBBF24' };
-  if (dp < 70) return { label: 'Sticky', color: '#F97316' };
-  return { label: 'Oppressive', color: '#EF4444' };
+  if (dp < 50) return { label: 'Dry', color: '#38BDF8' };
+  if (dp < 55) return { label: 'Comfortable', color: '#22C55E' };
+  if (dp < 60) return { label: 'Pleasant', color: '#84CC16' };
+  if (dp < 65) return { label: 'Noticeable', color: '#FACC15' };
+  if (dp < 70) return { label: 'Sticky', color: '#FB923C' };
+  return { label: 'Oppressive', color: '#F87171' };
 }
 
 function flComfort(fl) {
-  if (fl < 80) return { label: 'Comfortable', color: '#10B981' };
-  if (fl < 90) return { label: 'Caution', color: '#FBBF24' };
-  if (fl < 105) return { label: 'Danger', color: '#F97316' };
-  return { label: 'Extreme', color: '#EF4444' };
+  if (fl < 80) return { label: 'Comfortable', color: '#22C55E' };
+  if (fl < 90) return { label: 'Caution', color: '#FACC15' };
+  if (fl < 105) return { label: 'Danger', color: '#FB923C' };
+  return { label: 'Extreme', color: '#F87171' };
 }
 
 function cellColor(dp) {
-  if (dp < 50) return '#1E3A5F';
-  if (dp < 55) return '#065F46';
-  if (dp < 60) return '#047857';
-  if (dp < 65) return '#92400E';
-  if (dp < 70) return '#B45309';
-  return '#991B1B';
+  if (dp < 50) return '#075985';
+  if (dp < 55) return '#047857';
+  if (dp < 60) return '#15803D';
+  if (dp < 65) return '#B45309';
+  if (dp < 70) return '#C2410C';
+  return '#B91C1C';
 }
 
-function insightText(dp) {
-  if (dp < 55) return "Air feels crisp. Sweat evaporates quickly \u2014 your body cools efficiently.";
-  if (dp < 60) return "Comfortable conditions. Sweat evaporation works well, minimal perceived humidity.";
-  if (dp < 65) return "You'll start noticing the moisture. Sweat evaporates more slowly, body works a bit harder to cool.";
-  if (dp < 70) return "Sticky. Sweat lingers on skin, evaporative cooling is significantly impaired.";
-  return "Oppressive. Sweat can't evaporate effectively \u2014 heat stress risk is high.";
+function getGuidance(dp, fl) {
+  if (dp < 55 && fl < 82) {
+    return {
+      icon: '🟢', label: 'Green light', tag: 'Fast air', title: 'Great outdoor window',
+      text: 'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.',
+      pace: 'Normal pace', hydration: 'Normal fluids', exposure: 'Low climate stress', color: '#22C55E'
+    };
+  }
+  if (dp < 60 && fl < 86) {
+    return {
+      icon: '🟢', label: 'Good to go', tag: 'Comfortable', title: 'Comfortable for most sessions',
+      text: 'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.',
+      pace: 'Normal to +1%', hydration: 'Drink to thirst', exposure: 'Good window', color: '#84CC16'
+    };
+  }
+  if (dp < 65 && fl < 92) {
+    return {
+      icon: '🟡', label: 'Manage effort', tag: 'Noticeable humidity', title: 'Respect the moisture load',
+      text: 'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.',
+      pace: 'Back off 1–3%', hydration: 'Bring fluids', exposure: 'Shade helps', color: '#FACC15'
+    };
+  }
+  if (dp < 70 && fl < 100) {
+    return {
+      icon: '🟠', label: 'Adjust plan', tag: 'Sticky air', title: 'Dial down intensity',
+      text: 'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.',
+      pace: 'Back off 3–6%', hydration: 'Plan electrolytes', exposure: 'Avoid peak sun', color: '#FB923C'
+    };
+  }
+  return {
+    icon: '🔴', label: 'Heat caution', tag: 'Oppressive', title: 'Choose safer timing',
+    text: 'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.',
+    pace: 'Back off 6–10%+', hydration: 'Fluids + sodium', exposure: 'Seek shade/cooler time', color: '#F87171'
+  };
+}
+
+function setSliderProgress(slider) {
+  const min = +slider.min;
+  const max = +slider.max;
+  const value = +slider.value;
+  const pct = ((value - min) / (max - min)) * 100;
+  slider.style.background = `linear-gradient(90deg, #38BDF8 0%, #22C55E ${Math.max(20, pct * 0.65)}%, #F59E0B ${Math.max(55, pct)}%, #EF4444 100%)`;
 }
 
 function buildHeatmap() {
   let html = '<thead><tr><th>RH\\T</th>';
-  heatmapTemps.forEach(t => html += `<th>${t}\u00B0</th>`);
+  heatmapTemps.forEach(t => html += `<th>${t}°</th>`);
   html += '</tr></thead><tbody>';
   heatmapRHs.forEach(r => {
     html += `<tr><td>${r}%</td>`;
@@ -218,43 +442,48 @@ function buildHeatmap() {
 function update() {
   const T = +tempSlider.value;
   const RH = +rhSlider.value;
-  document.getElementById('tempVal').textContent = T + '\u00B0F';
+  document.getElementById('tempVal').textContent = T + '°F';
   document.getElementById('rhVal').textContent = RH + '%';
+  setSliderProgress(tempSlider);
+  setSliderProgress(rhSlider);
 
   const dp = calcDewPoint(T, RH);
   const fl = calcHeatIndex(T, RH);
   const dpc = dpComfort(dp);
   const flc = flComfort(fl);
+  const guidance = getGuidance(dp, fl);
+  document.documentElement.style.setProperty('--accent', guidance.color);
+  document.documentElement.style.setProperty('--accent-soft', guidance.color + '22');
 
-  document.getElementById('dpValue').innerHTML = dp.toFixed(1) + '<span class="gauge-unit">\u00B0F</span>';
+  document.getElementById('dpValue').innerHTML = dp.toFixed(1) + '<span class="metric-unit">°F</span>';
   const dpPct = Math.max(0, Math.min(100, ((dp - 20) / 60) * 100));
   const dpFill = document.getElementById('dpFill');
   dpFill.style.width = dpPct + '%';
-  dpFill.style.background = `linear-gradient(90deg, ${dpc.color}88, ${dpc.color})`;
+  dpFill.style.background = `linear-gradient(90deg, ${dpc.color}66, ${dpc.color})`;
   document.getElementById('dpComfort').textContent = dpc.label;
   document.getElementById('dpComfort').style.color = dpc.color;
 
-  document.getElementById('flValue').innerHTML = fl.toFixed(1) + '<span class="gauge-unit">\u00B0F</span>';
+  document.getElementById('flValue').innerHTML = fl.toFixed(1) + '<span class="metric-unit">°F</span>';
   const flPct = Math.max(0, Math.min(100, ((fl - 60) / 70) * 100));
   const flFillEl = document.getElementById('flFill');
   flFillEl.style.width = flPct + '%';
-  flFillEl.style.background = `linear-gradient(90deg, ${flc.color}88, ${flc.color})`;
+  flFillEl.style.background = `linear-gradient(90deg, ${flc.color}66, ${flc.color})`;
   document.getElementById('flComfort').textContent = flc.label;
   document.getElementById('flComfort').style.color = flc.color;
 
-  const ins = document.getElementById('insight');
-  ins.style.background = dpc.color + '15';
-  ins.style.border = `1px solid ${dpc.color}40`;
-  document.getElementById('insightText').textContent = insightText(dp);
+  document.getElementById('conditionIcon').textContent = guidance.icon;
+  document.getElementById('readinessLabel').textContent = guidance.label;
+  document.getElementById('conditionTag').textContent = guidance.tag;
+  document.getElementById('conditionTag').style.color = guidance.color;
+  document.getElementById('guidanceTitle').textContent = guidance.title;
+  document.getElementById('guidanceText').textContent = guidance.text;
+  document.getElementById('paceCue').textContent = guidance.pace;
+  document.getElementById('hydrationCue').textContent = guidance.hydration;
+  document.getElementById('exposureCue').textContent = guidance.exposure;
 
-  // highlight heatmap
   document.querySelectorAll('#heatmap td[data-t]').forEach(td => {
     const ct = +td.dataset.t, cr = +td.dataset.r;
-    if (Math.abs(ct - T) <= 2 && Math.abs(cr - RH) <= 5) {
-      td.classList.add('highlight');
-    } else {
-      td.classList.remove('highlight');
-    }
+    td.classList.toggle('highlight', Math.abs(ct - T) <= 2 && Math.abs(cr - RH) <= 5);
   });
 }
 
@@ -263,5 +492,6 @@ update();
 tempSlider.addEventListener('input', update);
 rhSlider.addEventListener('input', update);
 </script>
+<script src="./visit-logger.js" defer></script>
 </body>
 </html>
