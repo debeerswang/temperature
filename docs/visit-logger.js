@@ -17,22 +17,56 @@
     visitedAt: new Date().toISOString(),
   };
 
-  const body = JSON.stringify(payload);
+  const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+  const body = new URLSearchParams(
+    Object.entries(payload).map(([key, value]) => [key, value == null ? '' : String(value)]),
+  ).toString();
 
-  if (navigator.sendBeacon) {
-    const blob = new Blob([body], { type: 'application/json' });
-    const queued = navigator.sendBeacon(endpoint, blob);
-    if (queued) {
+  let sent = false;
+  let sending = false;
+
+  const finish = (ok) => {
+    sending = false;
+    if (ok) {
+      sent = true;
+    }
+  };
+
+  const sendVisit = () => {
+    if (sent || sending) {
       return;
     }
-  }
 
-  fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-    keepalive: true,
-    mode: 'cors',
-  }).catch(() => {
-  });
+    sending = true;
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: contentType });
+      if (navigator.sendBeacon(endpoint, blob)) {
+        finish(true);
+        return;
+      }
+    }
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': contentType },
+      body,
+      keepalive: true,
+      mode: 'cors',
+      credentials: 'omit',
+    }).then(() => {
+      finish(true);
+    }).catch(() => {
+      finish(false);
+    });
+  };
+
+  sendVisit();
+  window.addEventListener('pageshow', sendVisit, { passive: true });
+  window.addEventListener('pagehide', sendVisit, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      sendVisit();
+    }
+  }, { passive: true });
 })();

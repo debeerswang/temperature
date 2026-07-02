@@ -16,6 +16,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,ht
 fs.mkdirSync(dataDir, { recursive: true });
 
 app.use(express.json({ limit: '32kb' }));
+app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
