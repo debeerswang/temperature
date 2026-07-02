@@ -1,12 +1,25 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
 const port = Number(process.env.PORT || 8787);
 const dataDir = path.join(__dirname, 'data');
 const logFile = path.join(dataDir, 'visits.jsonl');
 const adminToken = process.env.ADMIN_TOKEN || '';
+const databaseUrl = process.env.DATABASE_URL || '';
+const usePostgres = Boolean(databaseUrl);
+
+let pool;
+
+if (usePostgres) {
+  const isLocalDb = /localhost|127\.0\.0\.1/.test(databaseUrl);
+  pool = new Pool({
+    connectionString: databaseUrl,
+    ssl: isLocalDb ? false : { rejectUnauthorized: false },
+  });
+}
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://debeerswang.github.io,https://debeerswang.github.io/temperature/')
   .split(',')
@@ -49,7 +62,7 @@ function getProvidedAdminToken(req) {
   return typeof queryToken === 'string' ? queryToken.trim() : '';
 }
 
-function readRecentEvents(limit) {
+function readRecentEventsFromFile(limit) {
   if (!fs.existsSync(logFile)) {
     return [];
   }
@@ -64,6 +77,125 @@ function readRecentEvents(limit) {
     }
   }
   return parsed.reverse();
+}
+
+async function initStorage() {
+  if (!usePostgres) {
+    return;
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS visit_events (
+      id BIGSERIAL PRIMARY KEY,
+      ip TEXT,
+      received_at TIMESTAMPTZ NOT NULL,
+      transport TEXT,
+      page TEXT,
+      title TEXT,
+      referrer TEXT,
+      user_agent TEXT,
+      language TEXT,
+      screen TEXT,
+      viewport TEXT,
+      timezone TEXT,
+      visited_at TIMESTAMPTZ
+    )
+  `);
+}
+
+async function appendVisitToPostgres(event) {
+  await pool.query(
+    `
+      INSERT INTO visit_events (
+        ip,
+        received_at,
+        transport,
+        page,
+        title,
+        referrer,
+        user_agent,
+        language,
+        screen,
+        viewport,
+        timezone,
+        visited_at
+      )
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        $12
+      )
+    `,
+    [
+      event.ip,
+      event.receivedAt,
+      event.transport,
+      event.page,
+      event.title,
+      event.referrer,
+      event.userAgent,
+      event.language,
+      event.screen,
+      event.viewport,
+      event.timezone,
+      event.visitedAt,
+    ],
+  );
+}
+
+async function readRecentEventsFromPostgres(limit) {
+  const result = await pool.query(
+    `
+      SELECT
+        ip,
+        received_at,
+        transport,
+        page,
+        title,
+        referrer,
+        user_agent,
+        language,
+        screen,
+        viewport,
+        timezone,
+        visited_at
+      FROM visit_events
+      ORDER BY received_at DESC
+      LIMIT $1
+    `,
+    [limit],
+  );
+
+  return result.rows.map((row) => ({
+    ip: row.ip,
+    receivedAt: row.received_at,
+    transport: row.transport,
+    page: row.page,
+    title: row.title,
+    referrer: row.referrer,
+    userAgent: row.user_agent,
+    language: row.language,
+    screen: row.screen,
+    viewport: row.viewport,
+    timezone: row.timezone,
+    visitedAt: row.visited_at,
+  }));
+}
+
+async function readRecentEvents(limit) {
+  if (usePostgres) {
+    return readRecentEventsFromPostgres(limit);
+  }
+  return readRecentEventsFromFile(limit);
 }
 
 app.get('/health', (_req, res) => {
@@ -87,23 +219,36 @@ function buildVisitEvent(req, transport) {
   };
 }
 
-function appendVisit(req, transport) {
+async function appendVisit(req, transport) {
   const event = buildVisitEvent(req, transport);
+
+  if (usePostgres) {
+    await appendVisitToPostgres(event);
+    return;
+  }
 
   fs.appendFileSync(logFile, JSON.stringify(event) + '\n', 'utf8');
 }
 
-app.post('/api/log-visit', (req, res) => {
-  appendVisit(req, 'post');
-  res.status(202).json({ ok: true });
+app.post('/api/log-visit', async (req, res) => {
+  try {
+    await appendVisit(req, 'post');
+    res.status(202).json({ ok: true });
+  } catch {
+    res.status(500).json({ ok: false, error: 'Failed to store visit event' });
+  }
 });
 
-app.get('/api/log-visit', (req, res) => {
-  appendVisit(req, 'get');
-  res.status(204).end();
+app.get('/api/log-visit', async (req, res) => {
+  try {
+    await appendVisit(req, 'get');
+    res.status(204).end();
+  } catch {
+    res.status(500).json({ ok: false, error: 'Failed to store visit event' });
+  }
 });
 
-app.get('/admin/recent', (req, res) => {
+app.get('/admin/recent', async (req, res) => {
   if (!adminToken) {
     return res.status(503).json({ ok: false, error: 'ADMIN_TOKEN is not configured on server' });
   }
@@ -118,11 +263,24 @@ app.get('/admin/recent', (req, res) => {
     ? Math.min(Math.max(requestedLimit, 1), 500)
     : 50;
 
-  const events = readRecentEvents(limit);
-  res.json({ ok: true, count: events.length, events });
+  try {
+    const events = await readRecentEvents(limit);
+    res.json({ ok: true, count: events.length, events });
+  } catch {
+    res.status(500).json({ ok: false, error: 'Failed to read visit events' });
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Visit logger listening on http://localhost:${port}`);
-  console.log(`Writing logs to ${logFile}`);
+initStorage().then(() => {
+  app.listen(port, () => {
+    console.log(`Visit logger listening on http://localhost:${port}`);
+    if (usePostgres) {
+      console.log('Storage backend: PostgreSQL');
+      return;
+    }
+    console.log(`Storage backend: file (${logFile})`);
+  });
+}).catch((error) => {
+  console.error('Failed to initialize storage', error);
+  process.exit(1);
 });

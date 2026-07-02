@@ -2,11 +2,15 @@
 
 This service records page views for the published Temperature page and captures the client IP address on the server side.
 
+Primary storage is PostgreSQL (`DATABASE_URL`).
+If `DATABASE_URL` is not set, the service falls back to local JSONL file logging.
+
 ## What it does
 
 - Accepts `POST /api/log-visit`
 - Determines the visitor IP from `X-Forwarded-For` or the socket remote address
-- Appends each visit as one JSON line to `logger/data/visits.jsonl`
+- Persists each visit event to PostgreSQL when `DATABASE_URL` is configured
+- Falls back to appending JSON lines to `logger/data/visits.jsonl` for local-only usage
 - Exposes `GET /admin/recent` for viewing recent activity (requires `ADMIN_TOKEN`)
 
 ## Start locally
@@ -18,6 +22,12 @@ npm start
 ```
 
 The published page is configured to post to `http://localhost:8787/api/log-visit` by default.
+
+For local Postgres usage, set `DATABASE_URL` before starting:
+
+```bash
+DATABASE_URL="postgres://user:password@localhost:5432/temperature_logger" npm start
+```
 
 ## Change the endpoint for production
 
@@ -35,6 +45,8 @@ git push origin main
 ```
 
 Then create a new Blueprint service in Render from this repository. Render will deploy the `logger` directory as a web service on port `8787`.
+
+The Blueprint also provisions a PostgreSQL database and injects `DATABASE_URL` into the web service.
 
 After Render gives you the public URL, update the `visit-log-endpoint` meta tag in both page files to:
 

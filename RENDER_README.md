@@ -21,6 +21,11 @@ This guide documents how to deploy and operate the `temperature-visit-logger` se
 - `startCommand`: `npm start`
 - `PORT`: `8787`
 - `ALLOWED_ORIGINS`: `https://debeerswang.github.io,https://debeerswang.github.io/temperature/`
+- `DATABASE_URL`: injected from Render PostgreSQL (`temperature-visit-logger-db`)
+
+Blueprint also provisions:
+
+- Render PostgreSQL database: `temperature-visit-logger-db`
 
 ## 1. Deploy on Render
 
@@ -72,6 +77,11 @@ Recommended value:
 ```text
 https://debeerswang.github.io,https://debeerswang.github.io/temperature/
 ```
+
+### `DATABASE_URL`
+
+Set automatically by Render Blueprint from the provisioned PostgreSQL instance.
+No manual entry required if you deploy with Blueprint.
 
 ## 3. Portal Endpoint Wiring
 
@@ -152,8 +162,8 @@ curl "https://temperature-visit-logger.onrender.com/admin/recent?token=<your-adm
 ## 7. Operational Notes
 
 - Render free plan can sleep on inactivity (cold starts)
-- File-based logs in container storage are not durable across all restarts/redeploys
-- If durable analytics is required, move logs to managed storage (DB/object store)
+- Visit events are now persisted in PostgreSQL, so logs survive restarts/redeploys
+- If `DATABASE_URL` is missing, service falls back to file logging (non-durable)
 
 ## 8. Quick Command Checklist
 
