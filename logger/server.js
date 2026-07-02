@@ -26,6 +26,26 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,ht
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+function isLocalOrigin(origin) {
+  try {
+    const parsed = new URL(origin);
+    return parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+function isOriginAllowed(origin) {
+  if (!origin) {
+    return false;
+  }
+  if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+    return true;
+  }
+  // Allow local dev dashboards (any localhost/127.0.0.1 port) without exposing wildcard internet origins.
+  return isLocalOrigin(origin);
+}
+
 fs.mkdirSync(dataDir, { recursive: true });
 
 app.use(express.json({ limit: '32kb' }));
@@ -33,7 +53,7 @@ app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && allowedOrigins.includes(origin)) {
+  if (origin && isOriginAllowed(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }

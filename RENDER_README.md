@@ -158,6 +158,7 @@ curl "https://temperature-visit-logger.onrender.com/admin/recent?token=<your-adm
 
 - Verify `ALLOWED_ORIGINS` includes the exact site origin
 - Confirm request `Origin` header matches one of the allowed values
+- Local dashboard origins on `localhost` / `127.0.0.1` are allowed by server code (any port)
 
 ### C) Laptop logs work, mobile logs missing
 

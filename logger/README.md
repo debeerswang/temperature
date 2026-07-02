@@ -62,6 +62,8 @@ Allowed origins are controlled by `ALLOWED_ORIGINS`:
 ALLOWED_ORIGINS="https://debeerswang.github.io,http://localhost:3000" npm start
 ```
 
+The server also allows local development origins on `localhost` and `127.0.0.1` (any port), so the local dashboard refresh button can call `/admin/recent` from `http://localhost:8080` or `http://localhost:8081`.
+
 ## View recent activity logs
 
 Set an admin token in your environment and restart the service:
