@@ -2,67 +2,282 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Outdoor Comfort">
-<meta name="theme-color" content="#07111f">
-<meta name="description" content="Outdoor comfort tool for runners, riders, hikers, and active people. Explore how temperature, humidity, dew point, and heat index affect training comfort.">
-<meta name="visit-log-endpoint" content="https://temperature-visit-logger.onrender.com/api/log-visit">
-<title>Outdoor Comfort Index</title>
+<meta name="apple-mobile-web-app-title" content="Climate Comfort">
+<meta name="theme-color" content="#0F172A">
+<meta name="visit-log-endpoint" content="http://localhost:8787/api/log-visit">
+<title>Climate Comfort</title>
 <style>
-:root{--bg:#07111f;--card:rgba(15,23,42,.82);--line:rgba(148,163,184,.18);--muted:#94a3b8;--text:#f8fafc;--soft:#cbd5e1;--accent:#22c55e;--accent-soft:rgba(34,197,94,.16);--safe-top:max(16px,env(safe-area-inset-top));--safe-right:max(12px,env(safe-area-inset-right));--safe-bottom:max(18px,env(safe-area-inset-bottom));--safe-left:max(12px,env(safe-area-inset-left))}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}body{min-height:100vh;min-height:100dvh;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;background:radial-gradient(circle at 8% 0%,rgba(14,165,233,.30),transparent 30%),radial-gradient(circle at 92% 4%,rgba(34,197,94,.22),transparent 30%),linear-gradient(180deg,#07111f 0%,#0f172a 52%,#111827 100%);-webkit-text-size-adjust:100%;overflow-x:hidden}.app{width:min(100%,720px);margin:0 auto;padding:calc(var(--safe-top) + 8px) var(--safe-right) calc(var(--safe-bottom) + 28px) var(--safe-left)}.hero,.card,.metric,.bottom-bar{border:1px solid var(--line);background:var(--card);box-shadow:0 20px 60px rgba(0,0,0,.34);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.hero{position:relative;overflow:hidden;border-radius:28px;padding:22px 18px 18px;margin-bottom:12px;background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(15,23,42,.72)),radial-gradient(circle at 82% 16%,rgba(250,204,21,.20),transparent 30%),radial-gradient(circle at 10% 92%,rgba(14,165,233,.18),transparent 34%)}.hero:after{content:"";position:absolute;right:-58px;top:-58px;width:170px;height:170px;border-radius:50%;border:24px solid rgba(255,255,255,.05)}.kicker{position:relative;z-index:1;color:#bae6fd;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}.hero h1{position:relative;z-index:1;font-size:clamp(31px,10vw,54px);line-height:.94;letter-spacing:-.06em}.subtitle{position:relative;z-index:1;color:var(--soft);font-size:14px;line-height:1.55;margin-top:12px}.status-row{position:relative;z-index:1;display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}.readiness{display:flex;align-items:center;gap:12px;border-radius:20px;padding:12px 14px;background:linear-gradient(160deg,var(--accent-soft),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.13)}#conditionIcon{font-size:28px;line-height:1}.readiness small{display:block;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}.readiness strong{font-size:15px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.chip{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:999px;padding:8px 10px;color:#e2e8f0;font-size:12px;font-weight:750}.card{border-radius:24px;padding:16px;margin-bottom:12px}.section-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:14px}.section-head h2{font-size:15px}.section-head p{font-size:12px;color:var(--muted);text-align:right}.slider-box{padding:14px;border-radius:20px;background:rgba(15,23,42,.76);border:1px solid rgba(148,163,184,.12);margin-bottom:12px}.slider-box:last-child{margin-bottom:0}.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:13px}.slider-label{font-size:13px;color:#cbd5e1;font-weight:760}.slider-value{font-size:29px;font-weight:950;letter-spacing:-.05em;font-variant-numeric:tabular-nums}.slider-range{display:flex;justify-content:space-between;color:#64748b;font-size:11px;margin-top:10px}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:15px;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#22c55e 50%,#f59e0b 72%,#ef4444);outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:36px;height:36px;border-radius:50%;background:#f8fafc;border:4px solid #0f172a;box-shadow:0 9px 26px rgba(0,0,0,.42),0 0 0 2px rgba(255,255,255,.25)}input[type=range]::-moz-range-thumb{width:36px;height:36px;border-radius:50%;background:#f8fafc;border:4px solid #0f172a;box-shadow:0 9px 26px rgba(0,0,0,.42),0 0 0 2px rgba(255,255,255,.25)}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.metric{position:relative;overflow:hidden;border-radius:24px;padding:16px}.metric:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,var(--accent-soft),transparent 42%);pointer-events:none}.metric-label{position:relative;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}.metric-value{position:relative;font-size:clamp(34px,12vw,50px);line-height:1;font-weight:950;letter-spacing:-.07em;font-variant-numeric:tabular-nums}.unit{font-size:16px;color:var(--muted);letter-spacing:0;margin-left:2px}.gauge-track{position:relative;height:11px;border-radius:999px;background:rgba(15,23,42,.94);overflow:hidden;margin:14px 0 9px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.gauge-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;transition:width .35s ease,background .35s ease}.metric-foot{position:relative;display:flex;justify-content:space-between;gap:8px;align-items:center}.comfort{font-size:13px;font-weight:850}.sub{font-size:11px;color:#64748b;text-align:right}.guidance h2{font-size:24px;line-height:1.05;letter-spacing:-.04em;margin-bottom:8px}.guidance-text{color:var(--soft);font-size:14px;line-height:1.6}.guidance-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:13px}.tag{border-radius:999px;padding:8px 10px;background:var(--accent-soft);border:1px solid rgba(255,255,255,.14);font-size:12px;font-weight:900;white-space:nowrap}.cues{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}.cue{padding:11px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}.cue b{display:block;color:#94a3b8;font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}.cue span{font-size:13px;font-weight:760;line-height:1.32}.map-hint{font-size:11px;color:#64748b;margin:-4px 0 10px}.map-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -2px}.map-wrap::-webkit-scrollbar{display:none}table{border-collapse:separate;border-spacing:5px;width:100%;min-width:520px;font-size:12px;text-align:center}th{padding:8px 6px;color:#94a3b8;font-weight:850}td{padding:9px 7px;color:#fff;border-radius:10px;border:2px solid transparent;font-variant-numeric:tabular-nums;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}td:first-child{position:sticky;left:0;background:#0f172a;color:#cbd5e1;font-weight:900;text-align:left}td.highlight{font-weight:950;border-color:#fff;transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.22)}.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#94a3b8;margin-top:12px}.legend span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.05)}.dot{width:11px;height:11px;border-radius:4px;display:inline-block}.note{color:#64748b;font-size:12px;line-height:1.55;margin-top:15px;text-align:center}.bottom-bar{position:sticky;bottom:calc(var(--safe-bottom) - 2px);z-index:10;border-radius:22px;padding:10px 11px;background:rgba(7,17,31,.84);margin-top:14px}.bottom-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bottom-pill{padding:7px 6px;border-radius:15px;background:rgba(255,255,255,.055);text-align:center}.bottom-pill label{display:block;color:#64748b;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}.bottom-pill strong{font-size:14px;color:#f8fafc}@media(max-width:640px){.metrics,.cues{grid-template-columns:1fr}.section-head{display:block}.section-head p{text-align:left;margin-top:4px}.guidance-top{display:block}.tag{display:inline-block;margin-top:10px}.hero,.card,.metric,.bottom-bar{border-radius:22px}.app{padding-left:var(--safe-left);padding-right:var(--safe-right)}}@media(max-width:390px){.app{padding-left:10px;padding-right:10px}.hero h1{font-size:30px}.slider-value{font-size:27px}.metric-value{font-size:34px}.bottom-pill strong{font-size:13px}}
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: #0F172A; color: #F1F5F9;
+    font-family: -apple-system, system-ui, 'Helvetica Neue', sans-serif;
+    padding: 0; min-height: 100vh; min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+  }
+  .container { max-width: 520px; margin: 0 auto; padding: 48px 20px 32px; }
+  h1 { font-size: 22px; font-weight: 700; color: #F8FAFC; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #64748B; margin-bottom: 32px; }
+  .page-description {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+  }
+  .page-description p { font-size: 13px; color: #CBD5E1; line-height: 1.6; }
+  .card { background: #1E293B; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .slider-group { margin-bottom: 20px; }
+  .slider-group:last-child { margin-bottom: 0; }
+  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .slider-label { font-size: 13px; color: #94A3B8; }
+  .slider-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .slider-range { display: flex; justify-content: space-between; font-size: 10px; color: #475569; margin-top: 3px; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: #0F172A; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #E2E8F0; border: 2px solid #475569; cursor: pointer;
+  }
+  .gauge { margin-bottom: 28px; }
+  .gauge:last-child { margin-bottom: 0; }
+  .gauge-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .gauge-label { font-size: 13px; color: #94A3B8; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .gauge-value { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .gauge-unit { font-size: 14px; color: #94A3B8; font-weight: 400; }
+  .gauge-track { position: relative; height: 10px; border-radius: 5px; background: #0F172A; overflow: hidden; }
+  .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width 0.3s ease, background 0.3s ease; }
+  .gauge-footer { display: flex; justify-content: space-between; margin-top: 5px; }
+  .gauge-comfort { font-size: 12px; font-weight: 600; transition: color 0.3s ease; }
+  .gauge-sub { font-size: 11px; color: #64748B; }
+  .insight { border-radius: 10px; padding: 16px; margin-bottom: 28px; transition: all 0.3s ease; }
+  .insight p { font-size: 13px; color: #CBD5E1; line-height: 1.6; }
+  .heatmap-title { font-size: 14px; font-weight: 600; color: #94A3B8; margin-bottom: 12px; letter-spacing: 0.03em; }
+  .heatmap-wrap { overflow-x: auto; margin-bottom: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 11px; text-align: center; }
+  th { padding: 6px 4px; color: #94A3B8; font-weight: 600; }
+  th:first-child { text-align: left; color: #64748B; font-weight: 500; }
+  td:first-child { text-align: left; color: #94A3B8; font-weight: 600; }
+  td { padding: 5px 3px; color: #E2E8F0; font-variant-numeric: tabular-nums; border-radius: 3px; border: 2px solid transparent; transition: all 0.2s; }
+  td.highlight { font-weight: 800; border-color: #F8FAFC; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 10px; color: #64748B; margin-bottom: 8px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+  .privacy-note {
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 18px;
+    background: rgba(15, 23, 42, 0.7);
+  }
+  .privacy-note strong { display: block; font-size: 11px; color: #E2E8F0; margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .privacy-note p { font-size: 11px; color: #94A3B8; line-height: 1.5; }
+  .footer-note { font-size: 11px; color: #475569; margin-top: 24px; line-height: 1.5; }
 </style>
 </head>
 <body>
-<main class="app">
-<section class="hero">
-<div class="kicker">▲ Outdoor activity comfort</div>
-<h1>Know the air before you move.</h1>
-<div style="position:relative;z-index:1;display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap">
-<div id="designerBadge" style="display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#e2e8f0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase">Designed by DW</div>
-<button id="languageToggle" type="button" style="display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;cursor:pointer">简体中文</button>
+
+<div class="container">
+  <h1>Climate Comfort</h1>
+  <p class="subtitle">How temperature &amp; humidity shape what you feel</p>
+  <div class="page-description">
+    <p>This interactive page explains how air temperature and humidity combine to change comfort, perceived heat, and the body's ability to cool itself through sweat evaporation.</p>
+  </div>
+
+  <div class="card">
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-label">Air Temperature</span>
+        <span class="slider-value" id="tempVal">74°F</span>
+      </div>
+      <input type="range" id="tempSlider" min="60" max="100" value="74">
+      <div class="slider-range"><span>60°F</span><span>100°F</span></div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-label">Relative Humidity</span>
+        <span class="slider-value" id="rhVal">67%</span>
+      </div>
+      <input type="range" id="rhSlider" min="10" max="95" value="67">
+      <div class="slider-range"><span>10%</span><span>95%</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding-bottom:4px">
+    <div class="gauge">
+      <div class="gauge-header">
+        <span class="gauge-label">Dew Point</span>
+        <span class="gauge-value" id="dpValue">--<span class="gauge-unit">°F</span></span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div>
+      <div class="gauge-footer">
+        <span class="gauge-comfort" id="dpComfort">--</span>
+        <span class="gauge-sub">What your body feels</span>
+      </div>
+    </div>
+    <div class="gauge">
+      <div class="gauge-header">
+        <span class="gauge-label">Feels Like</span>
+        <span class="gauge-value" id="flValue">--<span class="gauge-unit">°F</span></span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div>
+      <div class="gauge-footer">
+        <span class="gauge-comfort" id="flComfort">--</span>
+        <span class="gauge-sub">Heat index</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight" id="insight"><p id="insightText"></p></div>
+
+  <div class="heatmap-title">DEW POINT MAP — °F BY TEMP × RH</div>
+  <div class="heatmap-wrap">
+    <table id="heatmap"></table>
+  </div>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#1E3A5F"></span>Dry</span>
+    <span><span class="legend-dot" style="background:#065F46"></span>Comfortable</span>
+    <span><span class="legend-dot" style="background:#92400E"></span>Noticeable</span>
+    <span><span class="legend-dot" style="background:#991B1B"></span>Oppressive</span>
+  </div>
+
+  <div class="privacy-note">
+    <strong>Privacy notice</strong>
+    <p>If visit logging is enabled, this page may send your IP address, browser details, and page view metadata to a logging service for traffic monitoring.</p>
+  </div>
+
+  <p class="footer-note">Dew point = absolute moisture in air. RH is relative to temperature — same RH at different temps means different comfort. Your body responds to dew point.</p>
 </div>
-<p class="subtitle">Built for runners, cyclists, hikers, and race-day planners. Adjust conditions and see how humidity changes comfort, cooling, and training feel.</p>
-<div class="status-row"><div class="readiness"><span id="conditionIcon">🟢</span><div><small>Current signal</small><strong id="readinessLabel">Green light</strong></div></div></div>
-<div class="chips"><span class="chip">🏃 Run</span><span class="chip">🚴 Ride</span><span class="chip">🥾 Hike</span><span class="chip">🏁 Race day</span><span class="chip">💧 Sweat check</span></div>
-</section>
-<section class="card">
-<div class="section-head"><h2>Set the conditions</h2><p>Thumb-friendly controls</p></div>
-<div class="slider-box"><div class="slider-head"><span class="slider-label">Air Temperature</span><span class="slider-value" id="tempVal">74°F</span></div><input type="range" id="tempSlider" min="60" max="100" value="74" aria-label="Air temperature in Fahrenheit"><div class="slider-range"><span>Cool 60°F</span><span>Hot 100°F</span></div></div>
-<div class="slider-box"><div class="slider-head"><span class="slider-label">Relative Humidity</span><span class="slider-value" id="rhVal">67%</span></div><input type="range" id="rhSlider" min="10" max="95" value="67" aria-label="Relative humidity percent"><div class="slider-range"><span>Dry 10%</span><span>Steam 95%</span></div></div>
-</section>
-<section class="metrics">
-<article class="metric"><div class="metric-label">Dew point</div><div class="metric-value" id="dpValue">62.3<span class="unit">°F</span></div><div class="gauge-track"><div class="gauge-fill" id="dpFill"></div></div><div class="metric-foot"><span class="comfort" id="dpComfort">Noticeable</span><span class="sub">Moisture load</span></div></article>
-<article class="metric"><div class="metric-label">Feels like</div><div class="metric-value" id="flValue">74.0<span class="unit">°F</span></div><div class="gauge-track"><div class="gauge-fill" id="flFill"></div></div><div class="metric-foot"><span class="comfort" id="flComfort">Comfortable</span><span class="sub">Heat index</span></div></article>
-</section>
-<section class="card guidance">
-<div class="guidance-top"><div><div class="metric-label">Training guidance</div><h2 id="guidanceTitle">Manage effort</h2></div><span class="tag" id="conditionTag">Noticeable humidity</span></div>
-<p class="guidance-text" id="guidanceText">You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.</p>
-<div class="cues"><div class="cue"><b>Pace</b><span id="paceCue">Back off 1–3%</span></div><div class="cue"><b>Hydration</b><span id="hydrationCue">Bring fluids</span></div><div class="cue"><b>Exposure</b><span id="exposureCue">Shade helps</span></div></div>
-</section>
-<section class="card"><div class="section-head"><h2>Dew point map</h2><p>°F by temp × humidity</p></div><p class="map-hint">Swipe sideways on iPhone to explore the full table →</p><div class="map-wrap"><table id="heatmap" aria-label="Dew point map by temperature and humidity"></table></div><div class="legend"><span><i class="dot" style="background:#0ea5e9"></i><span class="legend-text">Dry</span></span><span><i class="dot" style="background:#16a34a"></i><span class="legend-text">Comfortable</span></span><span><i class="dot" style="background:#f59e0b"></i><span class="legend-text">Sticky</span></span><span><i class="dot" style="background:#dc2626"></i><span class="legend-text">Oppressive</span></span></div><p class="note">Dew point tracks actual moisture in the air and often predicts outdoor comfort better than relative humidity alone.</p></section>
-<section class="bottom-bar"><div class="bottom-inner"><div class="bottom-pill"><label>Temp</label><strong id="tempMini">74°F</strong></div><div class="bottom-pill"><label>Dew pt</label><strong id="dpMini">62.3°F</strong></div><div class="bottom-pill"><label>Feels</label><strong id="flMini">74.0°F</strong></div></div></section>
-</main>
+
 <script>
-const tempSlider=document.getElementById('tempSlider'),rhSlider=document.getElementById('rhSlider'),heatmapTemps=[68,72,76,80,84,88,92],heatmapRHs=[30,40,50,60,70,80,90],languageToggle=document.getElementById('languageToggle'),designerBadge=document.getElementById('designerBadge'),metaDescription=document.querySelector('meta[name="description"]'),appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]'),kickerEl=document.querySelector('.kicker'),heroTitleEl=document.querySelector('.hero h1'),subtitleEl=document.querySelector('.subtitle'),currentSignalLabel=document.querySelector('.readiness small'),chips=[...document.querySelectorAll('.chips .chip')],sectionHeads=[...document.querySelectorAll('.section-head')],sliderLabels=[...document.querySelectorAll('.slider-label')],sliderRangeLabels=[...document.querySelectorAll('.slider-range span')],metricLabels=[...document.querySelectorAll('.metric-label')],metricSubs=[...document.querySelectorAll('.sub')],guidanceMetricLabel=document.querySelector('.guidance .metric-label'),mapHint=document.querySelector('.map-hint'),legendTexts=[...document.querySelectorAll('.legend-text')],noteEl=document.querySelector('.note'),bottomLabels=[...document.querySelectorAll('.bottom-pill label')],heatmapEl=document.getElementById('heatmap'),languageKey='temperature-ui-lang',state={lang:'en'};
-const translations={en:{pageTitle:'Outdoor Comfort Index',metaDescription:'Outdoor comfort tool for runners, riders, hikers, and active people. Explore how temperature, humidity, dew point, and heat index affect training comfort.',appleTitle:'Outdoor Comfort',kicker:'▲ Outdoor activity comfort',heroTitle:'Know the air before you move.',designer:'Designed by DW',toggleLabel:'简体中文',toggleAria:'Switch to Simplified Chinese',subtitle:'Built for runners, cyclists, hikers, and race-day planners. Adjust conditions and see how humidity changes comfort, cooling, and training feel.',currentSignal:'Current signal',chips:['Run','Ride','Hike','Race day','Sweat check'],setConditions:'Set the conditions',controls:'Thumb-friendly controls',airTemperature:'Air Temperature',relativeHumidity:'Relative Humidity',cool:'Cool',hot:'Hot',dry:'Dry',steam:'Steam',dewPoint:'Dew point',feelsLike:'Feels like',moistureLoad:'Moisture load',heatIndex:'Heat index',trainingGuidance:'Training guidance',dewPointMap:'Dew point map',tempHumidity:'°F by temp × humidity',swipeHint:'Swipe sideways on iPhone to explore the full table →',heatmapAria:'Dew point map by temperature and humidity',heatmapCorner:'RH\\T',legend:['Dry','Comfortable','Sticky','Oppressive'],note:'Dew point tracks actual moisture in the air and often predicts outdoor comfort better than relative humidity alone.',bottom:['Temp','Dew pt','Feels'],comfortDp:{dry:'Dry',comfortable:'Comfortable',pleasant:'Pleasant',noticeable:'Noticeable',sticky:'Sticky',oppressive:'Oppressive'},comfortFl:{comfortable:'Comfortable',caution:'Caution',danger:'Danger',extreme:'Extreme'},guidance:{fast:{label:'Green light',tag:'Fast air',title:'Great outdoor window',text:'Air feels crisp and sweat can evaporate efficiently. This is a strong setup for easy miles, workouts, long rides, or hikes.',pace:'Normal pace',hydration:'Normal fluids',exposure:'Low climate stress'},good:{label:'Good to go',tag:'Comfortable',title:'Comfortable for most sessions',text:'Humidity is present but still manageable. Most athletes can train normally, with only a small comfort penalty on longer efforts.',pace:'Normal to +1%',hydration:'Drink to thirst',exposure:'Good window'},notice:{label:'Manage effort',tag:'Noticeable humidity',title:'Respect the moisture load',text:'You will start noticing the moisture. Sweat evaporates more slowly, so longer aerobic work may feel harder than the temperature alone suggests.',pace:'Back off 1–3%',hydration:'Bring fluids',exposure:'Shade helps'},sticky:{label:'Adjust plan',tag:'Sticky air',title:'Dial down intensity',text:'Sticky air makes cooling less efficient. Keep quality work shorter, extend recoveries, and avoid chasing normal pace splits.',pace:'Back off 3–6%',hydration:'Plan electrolytes',exposure:'Avoid peak sun'},heat:{label:'Heat caution',tag:'Oppressive',title:'Choose safer timing',text:'Evaporative cooling is heavily limited. Move the session earlier, shorten duration, reduce intensity, and watch for heat stress signs.',pace:'Back off 6–10%+',hydration:'Fluids + sodium',exposure:'Seek shade/cooler time'}}},zh:{pageTitle:'户外舒适指数',metaDescription:'面向跑步、骑行、徒步和运动人群的户外舒适工具。查看温度、湿度、露点和体感温度如何影响训练体验。',appleTitle:'户外舒适',kicker:'▲ 户外活动舒适度',heroTitle:'出发前先看空气。',designer:'DW 设计',toggleLabel:'English',toggleAria:'切换到英文',subtitle:'面向跑者、骑行者、徒步者和比赛日规划者。调整条件，查看湿度如何影响舒适度、散热和训练体感。',currentSignal:'当前信号',chips:['跑步','骑行','徒步','比赛日','出汗检查'],setConditions:'设置条件',controls:'适合单手操作',airTemperature:'气温',relativeHumidity:'相对湿度',cool:'凉爽',hot:'炎热',dry:'干燥',steam:'闷热',dewPoint:'露点',feelsLike:'体感温度',moistureLoad:'湿度负荷',heatIndex:'热指数',trainingGuidance:'训练建议',dewPointMap:'露点地图',tempHumidity:'温度 × 湿度（°F）',swipeHint:'在 iPhone 上左右滑动查看完整表格 →',heatmapAria:'按温度和湿度划分的露点地图',heatmapCorner:'湿度\\温度',legend:['干燥','舒适','黏热','闷热'],note:'露点反映空气中的实际水汽含量，通常比相对湿度更能预测户外舒适度。',bottom:['温度','露点','体感'],comfortDp:{dry:'干燥',comfortable:'舒适',pleasant:'宜人',noticeable:'明显',sticky:'黏热',oppressive:'闷热'},comfortFl:{comfortable:'舒适',caution:'注意',danger:'危险',extreme:'极端'},guidance:{fast:{label:'绿色通行',tag:'干爽空气',title:'绝佳户外窗口',text:'空气清爽，汗液蒸发效率高。非常适合轻松跑、训练、长骑或徒步。',pace:'正常配速',hydration:'正常补水',exposure:'气候压力低'},good:{label:'适合出发',tag:'舒适',title:'大多数训练都合适',text:'空气中有一定湿度，但仍然可控。大多数运动者可以正常训练，只是在长时间努力时会有轻微舒适度损失。',pace:'正常到快 1%',hydration:'按口渴补水',exposure:'良好时机'},notice:{label:'控制强度',tag:'湿度明显',title:'注意水汽负荷',text:'你会开始明显感到空气湿度。汗液蒸发变慢，因此较长时间的有氧训练会比单看温度更费力。',pace:'放慢 1–3%',hydration:'带上补给',exposure:'阴凉更好'},sticky:{label:'调整计划',tag:'黏热空气',title:'降低训练强度',text:'黏热空气会降低散热效率。把高强度工作做短一点，延长恢复，避免硬追正常配速。',pace:'放慢 3–6%',hydration:'安排电解质',exposure:'避开正午阳光'},heat:{label:'高温警示',tag:'闷热',title:'选择更安全的时段',text:'蒸发散热已受到明显限制。建议提前进行、缩短时长、降低强度，并留意热应激信号。',pace:'放慢 6–10%+',hydration:'水分 + 钠',exposure:'寻找阴凉/凉爽时段'}}}};
-function getCopy(){return translations[state.lang]||translations.en}
-function setLanguage(lang){state.lang=translations[lang]?lang:'en';try{localStorage.setItem(languageKey,state.lang)}catch{}applyLanguage()}
-function applyLanguage(){const copy=getCopy();document.documentElement.lang=state.lang==='zh'?'zh-CN':'en';document.title=copy.pageTitle;metaDescription.content=copy.metaDescription;appleTitle.content=copy.appleTitle;kickerEl.textContent=copy.kicker;heroTitleEl.textContent=copy.heroTitle;designerBadge.textContent=copy.designer;languageToggle.textContent=copy.toggleLabel;languageToggle.setAttribute('aria-label',copy.toggleAria);subtitleEl.textContent=copy.subtitle;currentSignalLabel.textContent=copy.currentSignal;chips.forEach((chip,index)=>{chip.textContent=copy.chips[index]});sectionHeads[0].querySelector('h2').textContent=copy.setConditions;sectionHeads[0].querySelector('p').textContent=copy.controls;sliderLabels[0].textContent=copy.airTemperature;sliderLabels[1].textContent=copy.relativeHumidity;sliderRangeLabels[0].textContent=`${copy.cool} 60°F`;sliderRangeLabels[1].textContent=`${copy.hot} 100°F`;sliderRangeLabels[2].textContent=`${copy.dry} 10%`;sliderRangeLabels[3].textContent=`${copy.steam} 95%`;metricLabels[0].textContent=copy.dewPoint;metricLabels[1].textContent=copy.feelsLike;metricLabels[2].textContent=copy.trainingGuidance;metricSubs[0].textContent=copy.moistureLoad;metricSubs[1].textContent=copy.heatIndex;guidanceMetricLabel.textContent=copy.trainingGuidance;sectionHeads[1].querySelector('h2').textContent=copy.dewPointMap;sectionHeads[1].querySelector('p').textContent=copy.tempHumidity;mapHint.textContent=copy.swipeHint;legendTexts.forEach((label,index)=>{label.textContent=copy.legend[index]});noteEl.textContent=copy.note;bottomLabels[0].textContent=copy.bottom[0];bottomLabels[1].textContent=copy.bottom[1];bottomLabels[2].textContent=copy.bottom[2];tempSlider.setAttribute('aria-label',copy.airTemperature);rhSlider.setAttribute('aria-label',copy.relativeHumidity);heatmapEl.setAttribute('aria-label',copy.heatmapAria);buildHeatmap();update()}
-function calcDewPoint(T,RH){const Tc=(T-32)*5/9,a=17.27,b=237.7,g=(a*Tc)/(b+Tc)+Math.log(RH/100),dpC=(b*g)/(a-g);return dpC*9/5+32}
-function calcHeatIndex(T,RH){if(T<80)return T;let HI=-42.379+2.04901523*T+10.14333127*RH-.22475541*T*RH-.00683783*T*T-.05481717*RH*RH+.00122874*T*T*RH+.00085282*T*RH*RH-.00000199*T*T*RH*RH;if(RH<13&&T>=80&&T<=112)HI-=((13-RH)/4)*Math.sqrt((17-Math.abs(T-95))/17);if(RH>85&&T>=80&&T<=87)HI+=((RH-85)/10)*((87-T)/5);return HI}
-function dpComfort(dp,lang){const labels=getCopy().comfortDp;if(dp<50)return{label:labels.dry,color:'#38bdf8'};if(dp<55)return{label:labels.comfortable,color:'#22c55e'};if(dp<60)return{label:labels.pleasant,color:'#84cc16'};if(dp<65)return{label:labels.noticeable,color:'#facc15'};if(dp<70)return{label:labels.sticky,color:'#fb923c'};return{label:labels.oppressive,color:'#f87171'}}
-function flComfort(fl,lang){const labels=getCopy().comfortFl;if(fl<80)return{label:labels.comfortable,color:'#22c55e'};if(fl<90)return{label:labels.caution,color:'#facc15'};if(fl<105)return{label:labels.danger,color:'#fb923c'};return{label:labels.extreme,color:'#f87171'}}
-function cellColor(dp){if(dp<50)return'#075985';if(dp<55)return'#047857';if(dp<60)return'#15803d';if(dp<65)return'#b45309';if(dp<70)return'#c2410c';return'#b91c1c'}
-function getGuidance(dp,fl,lang){const copy=getCopy().guidance;if(dp<55&&fl<82)return{icon:'🟢',...copy.fast,color:'#22c55e'};if(dp<60&&fl<86)return{icon:'🟢',...copy.good,color:'#84cc16'};if(dp<65&&fl<92)return{icon:'🟡',...copy.notice,color:'#facc15'};if(dp<70&&fl<100)return{icon:'🟠',...copy.sticky,color:'#fb923c'};return{icon:'🔴',...copy.heat,color:'#f87171'}}
-function setSliderProgress(slider){const min=+slider.min,max=+slider.max,value=+slider.value,pct=(value-min)/(max-min)*100;slider.style.background=`linear-gradient(90deg,#38bdf8 0%,#22c55e ${Math.max(20,pct*.65)}%,#f59e0b ${Math.max(55,pct)}%,#ef4444 100%)`}
-function buildHeatmap(){const copy=getCopy();let html=`<thead><tr><th>${copy.heatmapCorner}</th>`;heatmapTemps.forEach(t=>html+=`<th>${t}°</th>`);html+='</tr></thead><tbody>';heatmapRHs.forEach(r=>{html+=`<tr><td>${r}%</td>`;heatmapTemps.forEach(t=>{const d=calcDewPoint(t,r);html+=`<td data-t="${t}" data-r="${r}" style="background:${cellColor(d)}">${d.toFixed(0)}</td>`});html+='</tr>'});html+='</tbody>';heatmapEl.innerHTML=html}
-function update(){const T=+tempSlider.value,RH=+rhSlider.value;document.getElementById('tempVal').textContent=T+'°F';document.getElementById('rhVal').textContent=RH+'%';document.getElementById('tempMini').textContent=T+'°F';setSliderProgress(tempSlider);setSliderProgress(rhSlider);const dp=calcDewPoint(T,RH),fl=calcHeatIndex(T,RH),dpc=dpComfort(dp,state.lang),flc=flComfort(fl,state.lang),g=getGuidance(dp,fl,state.lang);document.documentElement.style.setProperty('--accent',g.color);document.documentElement.style.setProperty('--accent-soft',g.color+'22');document.getElementById('dpValue').innerHTML=dp.toFixed(1)+'<span class="unit">°F</span>';document.getElementById('dpMini').textContent=dp.toFixed(1)+'°F';const dpPct=Math.max(0,Math.min(100,(dp-20)/60*100)),dpFill=document.getElementById('dpFill');dpFill.style.width=dpPct+'%';dpFill.style.background=`linear-gradient(90deg,${dpc.color}66,${dpc.color})`;document.getElementById('dpComfort').textContent=dpc.label;document.getElementById('dpComfort').style.color=dpc.color;document.getElementById('flValue').innerHTML=fl.toFixed(1)+'<span class="unit">°F</span>';document.getElementById('flMini').textContent=fl.toFixed(1)+'°F';const flPct=Math.max(0,Math.min(100,(fl-60)/70*100)),flFill=document.getElementById('flFill');flFill.style.width=flPct+'%';flFill.style.background=`linear-gradient(90deg,${flc.color}66,${flc.color})`;document.getElementById('flComfort').textContent=flc.label;document.getElementById('flComfort').style.color=flc.color;document.getElementById('conditionIcon').textContent=g.icon;document.getElementById('readinessLabel').textContent=g.label;document.getElementById('conditionTag').textContent=g.tag;document.getElementById('conditionTag').style.color=g.color;document.getElementById('guidanceTitle').textContent=g.title;document.getElementById('guidanceText').textContent=g.text;document.getElementById('paceCue').textContent=g.pace;document.getElementById('hydrationCue').textContent=g.hydration;document.getElementById('exposureCue').textContent=g.exposure;document.querySelectorAll('#heatmap td[data-t]').forEach(td=>{const ct=+td.dataset.t,cr=+td.dataset.r;td.classList.toggle('highlight',Math.abs(ct-T)<=2&&Math.abs(cr-RH)<=5)})}
-try{state.lang=localStorage.getItem(languageKey)||(/zh/i.test(navigator.language)?'zh':'en')}catch{state.lang=/zh/i.test(navigator.language)?'zh':'en'}
-applyLanguage();
-tempSlider.addEventListener('input',update);rhSlider.addEventListener('input',update);languageToggle.addEventListener('click',()=>setLanguage(state.lang==='en'?'zh':'en'));
+const tempSlider = document.getElementById('tempSlider');
+const rhSlider = document.getElementById('rhSlider');
+const heatmapTemps = [68, 72, 76, 80, 84, 88, 92];
+const heatmapRHs = [30, 40, 50, 60, 70, 80, 90];
+
+function calcDewPoint(T, RH) {
+  const Tc = (T - 32) * 5 / 9;
+  const a = 17.27, b = 237.7;
+  const gamma = (a * Tc) / (b + Tc) + Math.log(RH / 100);
+  const dpC = (b * gamma) / (a - gamma);
+  return dpC * 9 / 5 + 32;
+}
+
+function calcHeatIndex(T, RH) {
+  if (T < 80) return T;
+  let HI = -42.379 + 2.04901523*T + 10.14333127*RH
+    - 0.22475541*T*RH - 0.00683783*T*T
+    - 0.05481717*RH*RH + 0.00122874*T*T*RH
+    + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH;
+  if (RH < 13 && T >= 80 && T <= 112)
+    HI -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
+  if (RH > 85 && T >= 80 && T <= 87)
+    HI += ((RH - 85) / 10) * ((87 - T) / 5);
+  return HI;
+}
+
+function dpComfort(dp) {
+  if (dp < 50) return { label: 'Dry', color: '#3B82F6' };
+  if (dp < 55) return { label: 'Comfortable', color: '#10B981' };
+  if (dp < 60) return { label: 'Pleasant', color: '#6EE7B7' };
+  if (dp < 65) return { label: 'Noticeable', color: '#FBBF24' };
+  if (dp < 70) return { label: 'Sticky', color: '#F97316' };
+  return { label: 'Oppressive', color: '#EF4444' };
+}
+
+function flComfort(fl) {
+  if (fl < 80) return { label: 'Comfortable', color: '#10B981' };
+  if (fl < 90) return { label: 'Caution', color: '#FBBF24' };
+  if (fl < 105) return { label: 'Danger', color: '#F97316' };
+  return { label: 'Extreme', color: '#EF4444' };
+}
+
+function cellColor(dp) {
+  if (dp < 50) return '#1E3A5F';
+  if (dp < 55) return '#065F46';
+  if (dp < 60) return '#047857';
+  if (dp < 65) return '#92400E';
+  if (dp < 70) return '#B45309';
+  return '#991B1B';
+}
+
+function insightText(dp) {
+  if (dp < 55) return "Air feels crisp. Sweat evaporates quickly \u2014 your body cools efficiently.";
+  if (dp < 60) return "Comfortable conditions. Sweat evaporation works well, minimal perceived humidity.";
+  if (dp < 65) return "You'll start noticing the moisture. Sweat evaporates more slowly, body works a bit harder to cool.";
+  if (dp < 70) return "Sticky. Sweat lingers on skin, evaporative cooling is significantly impaired.";
+  return "Oppressive. Sweat can't evaporate effectively \u2014 heat stress risk is high.";
+}
+
+function buildHeatmap() {
+  let html = '<thead><tr><th>RH\\T</th>';
+  heatmapTemps.forEach(t => html += `<th>${t}\u00B0</th>`);
+  html += '</tr></thead><tbody>';
+  heatmapRHs.forEach(r => {
+    html += `<tr><td>${r}%</td>`;
+    heatmapTemps.forEach(t => {
+      const d = calcDewPoint(t, r);
+      html += `<td data-t="${t}" data-r="${r}" style="background:${cellColor(d)}">${d.toFixed(0)}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('heatmap').innerHTML = html;
+}
+
+function update() {
+  const T = +tempSlider.value;
+  const RH = +rhSlider.value;
+  document.getElementById('tempVal').textContent = T + '\u00B0F';
+  document.getElementById('rhVal').textContent = RH + '%';
+
+  const dp = calcDewPoint(T, RH);
+  const fl = calcHeatIndex(T, RH);
+  const dpc = dpComfort(dp);
+  const flc = flComfort(fl);
+
+  document.getElementById('dpValue').innerHTML = dp.toFixed(1) + '<span class="gauge-unit">\u00B0F</span>';
+  const dpPct = Math.max(0, Math.min(100, ((dp - 20) / 60) * 100));
+  const dpFill = document.getElementById('dpFill');
+  dpFill.style.width = dpPct + '%';
+  dpFill.style.background = `linear-gradient(90deg, ${dpc.color}88, ${dpc.color})`;
+  document.getElementById('dpComfort').textContent = dpc.label;
+  document.getElementById('dpComfort').style.color = dpc.color;
+
+  document.getElementById('flValue').innerHTML = fl.toFixed(1) + '<span class="gauge-unit">\u00B0F</span>';
+  const flPct = Math.max(0, Math.min(100, ((fl - 60) / 70) * 100));
+  const flFillEl = document.getElementById('flFill');
+  flFillEl.style.width = flPct + '%';
+  flFillEl.style.background = `linear-gradient(90deg, ${flc.color}88, ${flc.color})`;
+  document.getElementById('flComfort').textContent = flc.label;
+  document.getElementById('flComfort').style.color = flc.color;
+
+  const ins = document.getElementById('insight');
+  ins.style.background = dpc.color + '15';
+  ins.style.border = `1px solid ${dpc.color}40`;
+  document.getElementById('insightText').textContent = insightText(dp);
+
+  // highlight heatmap
+  document.querySelectorAll('#heatmap td[data-t]').forEach(td => {
+    const ct = +td.dataset.t, cr = +td.dataset.r;
+    if (Math.abs(ct - T) <= 2 && Math.abs(cr - RH) <= 5) {
+      td.classList.add('highlight');
+    } else {
+      td.classList.remove('highlight');
+    }
+  });
+}
+
+buildHeatmap();
+update();
+tempSlider.addEventListener('input', update);
+rhSlider.addEventListener('input', update);
 </script>
-<script src="./docs/visit-logger.js" defer></script>
+<script src="./docs/visit-logger-mobile.js" defer></script>
 </body>
 </html>
