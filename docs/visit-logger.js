@@ -21,8 +21,10 @@
 
   if (navigator.sendBeacon) {
     const blob = new Blob([body], { type: 'application/json' });
-    navigator.sendBeacon(endpoint, blob);
-    return;
+    const queued = navigator.sendBeacon(endpoint, blob);
+    if (queued) {
+      return;
+    }
   }
 
   fetch(endpoint, {
