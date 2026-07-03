@@ -138,6 +138,7 @@ This README documents the actions taken and commands used during the session.
 - Admin endpoint for recent logs: `GET /admin/recent` (protected by `ADMIN_TOKEN`).
 - Local dashboard instructions: [logs/README.md](logs/README.md)
 - Local dashboard timestamps are displayed in `America/Chicago`.
+- Event cards in the local dashboard expand every JSON field from each snapshot record.
 
 ## Summary of actions performed
 

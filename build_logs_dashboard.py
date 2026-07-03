@@ -433,6 +433,46 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       target.appendChild(table);
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatValue(value) {
+      if (value === null) return 'null';
+      if (value === undefined) return 'undefined';
+      if (value instanceof Date) return value.toISOString();
+      if (Array.isArray(value)) return `[${value.map((item) => formatValue(item)).join(', ')}]`;
+      if (typeof value === 'object') {
+        return JSON.stringify(value, null, 2);
+      }
+      return String(value);
+    }
+
+    function renderAllFields(event) {
+      const entries = Object.entries(event || {});
+      if (!entries.length) {
+        return '<div class="meta">No event fields available.</div>';
+      }
+
+      const rows = entries.map(([key, value]) => {
+        const rendered = formatValue(value);
+        const isMultiline = rendered.includes('\\n');
+        return `
+          <tr>
+            <th>${escapeHtml(key)}</th>
+            <td>${isMultiline ? `<pre>${escapeHtml(rendered)}</pre>` : escapeHtml(rendered)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      return `<table class="event-detail-table"><tbody>${rows}</tbody></table>`;
+    }
+
     function renderDashboard(summary, events) {
       const sortedEvents = sortEventsByReceivedAtDesc(events);
       const cardData = [
@@ -463,8 +503,9 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         item.className = 'event';
         item.innerHTML = `
           <div class=\"meta\">${formatChicago(event.receivedAt)} | ${event.ip || 'unknown ip'} | ${event.transport || 'unknown transport'}</div>
-          <div><strong>${event.title || '(no title)'}</strong> on <code>${event.page || 'unknown page'}</code></div>
-          <div class=\"meta\">lang=${event.language || 'n/a'} timezone=${event.timezone || 'n/a'}</div>
+          <div><strong>${escapeHtml(event.title || '(no title)')}</strong> on <code>${escapeHtml(event.page || 'unknown page')}</code></div>
+          <div class="meta">lang=${escapeHtml(event.language || 'n/a')} timezone=${escapeHtml(event.timezone || 'n/a')}</div>
+          ${renderAllFields(event)}
         `;
         eventsWrap.appendChild(item);
       });

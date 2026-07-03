@@ -48,5 +48,6 @@ Use the portal controls to fetch the latest server events, then save or download
 - The bottom event list is sorted by `receivedAt` descending.
 - All displayed timestamps in the dashboard are rendered in `America/Chicago`.
 - Hourly and daily breakdowns are grouped using `America/Chicago` timezone boundaries.
+- Each event card at the bottom expands every JSON field from the snapshot record.
 - Duplicate records are removed before rendering the combined view.
 - If the browser blocks the refresh call, make sure the logger service has been redeployed after the latest CORS update.
