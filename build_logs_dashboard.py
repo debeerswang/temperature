@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 from collections import Counter
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 LOG_DIR = ROOT_DIR / "logs"
 OUTPUT_JSON = LOG_DIR / "combined_dedup.json"
 OUTPUT_HTML = LOG_DIR / "dashboard.html"
+CHICAGO_TZ = ZoneInfo("America/Chicago")
 
 
 def parse_iso(ts: str | None) -> datetime | None:
@@ -28,6 +30,14 @@ def parse_iso(ts: str | None) -> datetime | None:
         return datetime.fromisoformat(ts.replace("Z", "+00:00"))
     except ValueError:
         return None
+
+
+def to_chicago(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(CHICAGO_TZ)
 
 
 def load_events_from_file(path: Path) -> list[dict[str, Any]]:
@@ -94,10 +104,10 @@ def compute_insights(files: list[str], raw_events: list[dict[str, Any]], unique_
         transport_counter[event.get("transport") or "unknown"] += 1
         device_counter[classify_device(event.get("userAgent"))] += 1
 
-        ts = parse_iso(event.get("receivedAt"))
+        ts = to_chicago(parse_iso(event.get("receivedAt")))
         if ts:
             parsed_times.append(ts)
-            hourly_counter[f"{ts.hour:02d}:00 UTC"] += 1
+            hourly_counter[f"{ts.hour:02d}:00 America/Chicago"] += 1
             daily_counter[ts.date().isoformat()] += 1
 
     earliest = min(parsed_times).isoformat() if parsed_times else None
@@ -240,7 +250,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         <div id=\"dailyBreakdown\"></div>
       </article>
       <article class=\"panel\">
-        <h2>Hourly Breakdown (UTC)</h2>
+        <h2>Hourly Breakdown (America/Chicago)</h2>
         <div id=\"hourlyBreakdown\"></div>
       </article>
     </section>
@@ -313,6 +323,39 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       return Number.isNaN(t.getTime()) ? null : t;
     }
 
+    function formatChicago(ts) {
+      const t = parseTime(ts);
+      if (!t) return 'N/A';
+      return t.toLocaleString('en-US', {
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZoneName: 'short'
+      });
+    }
+
+    function chicagoDateKey(ts) {
+      const t = parseTime(ts);
+      if (!t) return null;
+      return t.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+    }
+
+    function chicagoHourLabel(ts) {
+      const t = parseTime(ts);
+      if (!t) return null;
+      const hour = t.toLocaleString('en-US', {
+        timeZone: 'America/Chicago',
+        hour: '2-digit',
+        hour12: false
+      });
+      return `${hour}:00 America/Chicago`;
+    }
+
     function sortEventsByReceivedAtDesc(events) {
       return [...events].sort((left, right) => {
         const leftTime = parseTime(left.receivedAt)?.getTime() || 0;
@@ -344,8 +387,10 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         const t = parseTime(event.receivedAt);
         if (t) {
           times.push(t);
-          add(hourly, `${String(t.getUTCHours()).padStart(2, '0')}:00 UTC`);
-          add(daily, t.toISOString().slice(0, 10));
+          const hourLabel = chicagoHourLabel(event.receivedAt);
+          const dayLabel = chicagoDateKey(event.receivedAt);
+          if (hourLabel) add(hourly, hourLabel);
+          if (dayLabel) add(daily, dayLabel);
         }
       }
 
@@ -395,8 +440,8 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         ['Raw Events', summary.rawEventCount],
         ['Unique Events', summary.uniqueEventCount],
         ['Duplicates Removed', summary.duplicatesRemoved],
-        ['Earliest', summary.timeRange.earliestReceivedAt || 'N/A'],
-        ['Latest', summary.timeRange.latestReceivedAt || 'N/A']
+        ['Earliest (Chicago)', formatChicago(summary.timeRange.earliestReceivedAt)],
+        ['Latest (Chicago)', formatChicago(summary.timeRange.latestReceivedAt)]
       ];
 
       const cards = document.getElementById('cards');
@@ -417,7 +462,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         const item = document.createElement('div');
         item.className = 'event';
         item.innerHTML = `
-          <div class=\"meta\">${event.receivedAt || 'unknown time'} | ${event.ip || 'unknown ip'} | ${event.transport || 'unknown transport'}</div>
+          <div class=\"meta\">${formatChicago(event.receivedAt)} | ${event.ip || 'unknown ip'} | ${event.transport || 'unknown transport'}</div>
           <div><strong>${event.title || '(no title)'}</strong> on <code>${event.page || 'unknown page'}</code></div>
           <div class=\"meta\">lang=${event.language || 'n/a'} timezone=${event.timezone || 'n/a'}</div>
         `;

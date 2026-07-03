@@ -137,6 +137,7 @@ This README documents the actions taken and commands used during the session.
 - If `DATABASE_URL` is absent, logger falls back to local JSONL file storage.
 - Admin endpoint for recent logs: `GET /admin/recent` (protected by `ADMIN_TOKEN`).
 - Local dashboard instructions: [logs/README.md](logs/README.md)
+- Local dashboard timestamps are displayed in `America/Chicago`.
 
 ## Summary of actions performed
 
