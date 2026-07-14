@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generatedAt": "2026-07-03T21:54:32.465200+00:00",
+    "generatedAt": "2026-07-14T00:08:12.845202+00:00",
     "filesProcessed": [
       "recent_20260702_101135.json",
       "recent_20260702_101204.json",
@@ -14,16 +14,23 @@
       "recent_20260702_184343.json",
       "recent_20260702_215216.json",
       "recent_20260703_084512.json",
-      "recent_20260703_165427.json"
+      "recent_20260703_165427.json",
+      "recent_20260705_182117.json",
+      "recent_20260708_134413.json",
+      "recent_20260713_140521.json"
     ],
-    "rawEventCount": 203,
-    "uniqueEventCount": 37,
-    "duplicatesRemoved": 166,
+    "rawEventCount": 340,
+    "uniqueEventCount": 51,
+    "duplicatesRemoved": 289,
     "timeRange": {
       "earliestReceivedAt": "2026-07-01T23:07:00.318000-05:00",
-      "latestReceivedAt": "2026-07-03T15:49:14.404000-05:00"
+      "latestReceivedAt": "2026-07-12T15:25:02.797000-05:00"
     },
     "topIPs": [
+      {
+        "label": "66.41.6.201",
+        "count": 5
+      },
       {
         "label": "172.56.10.44",
         "count": 5
@@ -35,6 +42,14 @@
       {
         "label": "174.200.1.212",
         "count": 4
+      },
+      {
+        "label": "107.4.178.170",
+        "count": 3
+      },
+      {
+        "label": "134.204.180.71",
+        "count": 2
       },
       {
         "label": "97.127.66.46",
@@ -51,30 +66,18 @@
       {
         "label": "73.65.7.13",
         "count": 2
-      },
-      {
-        "label": "66.41.6.201",
-        "count": 2
-      },
-      {
-        "label": "172.58.9.24",
-        "count": 1
-      },
-      {
-        "label": "104.28.48.48",
-        "count": 1
       }
     ],
     "topPages": [
       {
         "label": "/temperature/",
-        "count": 37
+        "count": 51
       }
     ],
     "topLanguages": [
       {
         "label": "en-US",
-        "count": 31
+        "count": 44
       },
       {
         "label": "en",
@@ -82,13 +85,21 @@
       },
       {
         "label": "zh-CN",
-        "count": 2
+        "count": 3
       }
     ],
     "topTimezones": [
       {
         "label": "America/Chicago",
-        "count": 35
+        "count": 47
+      },
+      {
+        "label": "UTC",
+        "count": 1
+      },
+      {
+        "label": "Asia/Hong_Kong",
+        "count": 1
       },
       {
         "label": "Asia/Tokyo",
@@ -102,65 +113,81 @@
     "transportBreakdown": [
       {
         "label": "get",
-        "count": 34
+        "count": 47
       },
       {
         "label": "post",
-        "count": 3
+        "count": 4
       }
     ],
     "deviceBreakdown": [
       {
         "label": "mobile",
-        "count": 31
+        "count": 38
       },
       {
         "label": "desktop",
-        "count": 6
+        "count": 13
       }
     ],
     "hourlyBreakdown": [
       {
         "label": "14:00 America/Chicago",
-        "count": 8
+        "count": 9
+      },
+      {
+        "label": "18:00 America/Chicago",
+        "count": 7
       },
       {
         "label": "23:00 America/Chicago",
         "count": 6
       },
       {
+        "label": "13:00 America/Chicago",
+        "count": 5
+      },
+      {
         "label": "11:00 America/Chicago",
         "count": 5
       },
       {
-        "label": "18:00 America/Chicago",
-        "count": 5
+        "label": "10:00 America/Chicago",
+        "count": 4
       },
       {
         "label": "09:00 America/Chicago",
         "count": 4
       },
       {
+        "label": "15:00 America/Chicago",
+        "count": 3
+      },
+      {
         "label": "07:00 America/Chicago",
         "count": 3
       },
       {
-        "label": "15:00 America/Chicago",
-        "count": 2
-      },
-      {
-        "label": "13:00 America/Chicago",
-        "count": 2
-      },
-      {
         "label": "16:00 America/Chicago",
         "count": 2
+      },
+      {
+        "label": "12:00 America/Chicago",
+        "count": 1
+      },
+      {
+        "label": "06:00 America/Chicago",
+        "count": 1
+      },
+      {
+        "label": "20:00 America/Chicago",
+        "count": 1
       }
     ],
     "dailyBreakdown": [
       {
         "label": "2026-07-03",
-        "count": 16
+        "count": 17
       },
       {
         "label": "2026-07-02",
@@ -169,10 +196,234 @@
       {
         "label": "2026-07-01",
         "count": 6
+      },
+      {
+        "label": "2026-07-06",
+        "count": 5
+      },
+      {
+        "label": "2026-07-12",
+        "count": 2
+      },
+      {
+        "label": "2026-07-11",
+        "count": 2
+      },
+      {
+        "label": "2026-07-09",
+        "count": 1
+      },
+      {
+        "label": "2026-07-08",
+        "count": 1
+      },
+      {
+        "label": "2026-07-05",
+        "count": 1
+      },
+      {
+        "label": "2026-07-04",
+        "count": 1
       }
     ]
   },
   "events": [
+    {
+      "ip": "66.41.6.201",
+      "receivedAt": "2026-07-12T20:25:02.797Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "language": "en-US",
+      "screen": "430x932",
+      "viewport": "430x873",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-12T20:24:40.088Z"
+    },
+    {
+      "ip": "172.58.14.218",
+      "receivedAt": "2026-07-12T18:30:33.725Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-12T18:30:21.387Z"
+    },
+    {
+      "ip": "66.41.6.201",
+      "receivedAt": "2026-07-11T19:25:05.182Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "language": "en-US",
+      "screen": "430x932",
+      "viewport": "430x775",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-11T19:24:53.595Z"
+    },
+    {
+      "ip": "174.200.9.131",
+      "receivedAt": "2026-07-11T15:21:33.612Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "language": "en-US",
+      "screen": "430x932",
+      "viewport": "430x775",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-11T15:21:21.092Z"
+    },
+    {
+      "ip": "140.248.30.104",
+      "receivedAt": "2026-07-09T23:50:48.225Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "language": "en-US",
+      "screen": "393x852",
+      "viewport": "393x695",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-09T23:50:36.012Z"
+    },
+    {
+      "ip": "134.204.180.71",
+      "receivedAt": "2026-07-08T18:42:37.498Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1",
+      "language": "en-US",
+      "screen": "430x932",
+      "viewport": "430x775",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-08T18:42:25.664Z"
+    },
+    {
+      "ip": "172.58.9.153",
+      "receivedAt": "2026-07-06T17:39:26.165Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-06T17:39:15.644Z"
+    },
+    {
+      "ip": "107.4.178.170",
+      "receivedAt": "2026-07-06T15:26:25.538Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-06T15:26:26.289Z"
+    },
+    {
+      "ip": "107.4.178.170",
+      "receivedAt": "2026-07-06T15:26:12.731Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-06T15:26:13.485Z"
+    },
+    {
+      "ip": "107.4.178.170",
+      "receivedAt": "2026-07-06T15:25:42.550Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-06T15:25:31.092Z"
+    },
+    {
+      "ip": "95.215.0.144",
+      "receivedAt": "2026-07-06T11:29:15.628Z",
+      "transport": "post",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "800x600",
+      "viewport": "1366x681",
+      "timezone": "UTC",
+      "visitedAt": "2026-07-06T11:29:03.062Z"
+    },
+    {
+      "ip": "172.58.14.185",
+      "receivedAt": "2026-07-05T23:19:55.161Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "language": "en-US",
+      "screen": "448x998",
+      "viewport": "980x1897",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-05T23:19:55.455Z"
+    },
+    {
+      "ip": "66.41.6.201",
+      "receivedAt": "2026-07-04T18:43:08.150Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": "https://weixin110.qq.com/",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b34) NetType/WIFI Language/zh_CN",
+      "language": "zh-CN",
+      "screen": "430x932",
+      "viewport": "430x751",
+      "timezone": "America/Chicago",
+      "visitedAt": "2026-07-04T18:42:55.907Z"
+    },
+    {
+      "ip": "161.81.182.63",
+      "receivedAt": "2026-07-04T01:00:33.247Z",
+      "transport": "get",
+      "page": "/temperature/",
+      "title": "Outdoor Comfort Index",
+      "referrer": "https://weixin110.qq.com/",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.75(0x18004b31) NetType/WIFI Language/en",
+      "language": "en-US",
+      "screen": "440x956",
+      "viewport": "440x758",
+      "timezone": "Asia/Hong_Kong",
+      "visitedAt": "2026-07-04T01:00:10.995Z"
+    },
     {
       "ip": "68.63.220.95",
       "receivedAt": "2026-07-03T20:49:14.404Z",

@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: temperature_logger
+      POSTGRES_USER: logger
+      POSTGRES_PASSWORD: loggerpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logger -d temperature_logger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  logger:
+    build: ./logger
+    ports:
+      - "8787:8787"
+    environment:
+      - DATABASE_URL=postgres://logger:loggerpassword@postgres:5432/temperature_logger
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-replace-with-a-long-random-secret}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,https://debeerswang.github.io}
+    volumes:
+      - ./logger/data:/usr/src/app/data
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

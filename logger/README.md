@@ -29,6 +29,46 @@ For local Postgres usage, set `DATABASE_URL` before starting:
 DATABASE_URL="postgres://user:password@localhost:5432/temperature_logger" npm start
 ```
 
+## Docker / docker-compose (self-host)
+
+You can run the logger and a local Postgres instance using `docker-compose` from the repository root. This is a convenient self-hosting alternative to Render.
+
+1. From the repository root, build and start the services:
+
+```bash
+cd /Users/debeerswang/Documents/Code/Temperature
+# Optionally set an admin token in your shell or export it into an .env file
+export ADMIN_TOKEN="replace-with-a-long-random-secret"
+docker-compose up -d --build
+```
+
+2. Verify the logger is healthy and listening:
+
+```bash
+curl http://localhost:8787/health
+# expected: {"ok":true}
+```
+
+3. Fetch recent events using the admin endpoint (token required):
+
+```bash
+curl "http://localhost:8787/admin/recent?token=${ADMIN_TOKEN}&limit=50"
+```
+
+4. Data persistence:
+
+- Postgres data is stored in a Docker volume named `postgres_data` (created by `docker-compose`).
+- The logger also writes JSONL fallback files to `logger/data` on the host via a bind mount.
+
+To stop and remove containers:
+
+```bash
+docker-compose down
+```
+
+If you prefer to run the logger without Postgres, unset `DATABASE_URL` and the service will fall back to `logger/data/visits.jsonl` as described above.
+
+
 ## Change the endpoint for production
 
 Update the `visit-log-endpoint` meta tag in `docs/index.html` to point at your deployed logger service.

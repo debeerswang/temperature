@@ -13,8 +13,17 @@ const usePostgres = Boolean(databaseUrl);
 
 let pool;
 
+function isLocalDatabaseUrl(url) {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'postgres';
+  } catch {
+    return /localhost|127\.0\.0\.1|postgres/.test(url);
+  }
+}
+
 if (usePostgres) {
-  const isLocalDb = /localhost|127\.0\.0\.1/.test(databaseUrl);
+  const isLocalDb = isLocalDatabaseUrl(databaseUrl);
   pool = new Pool({
     connectionString: databaseUrl,
     ssl: isLocalDb ? false : { rejectUnauthorized: false },

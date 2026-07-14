@@ -140,6 +140,34 @@ This README documents the actions taken and commands used during the session.
 - Local dashboard timestamps are displayed in `America/Chicago`.
 - Event cards in the local dashboard expand every JSON field from each snapshot record.
 
+## Self-hosting (replace Render)
+
+If you prefer to run the logger on your own server instead of using Render, there's a lightweight Docker setup that runs the `logger` service with a local Postgres database.
+
+Recommended flow (from the repository root):
+
+```bash
+# set an admin token first (use a long random string)
+export ADMIN_TOKEN="replace-with-a-long-random-secret"
+docker-compose up -d --build
+```
+
+Access the logger locally at `http://localhost:8787`. Health check: `http://localhost:8787/health`.
+
+The dashboard workflow (see `logs/README.md`) can fetch events from `http://localhost:8787/admin/recent` using the `ADMIN_TOKEN`.
+
+Data persistence details:
+- PostgreSQL runs in Docker and stores data in a named volume `postgres_data`.
+- Fallback JSON lines are written to `logger/data` on the host via a bind mount.
+
+To stop and remove the services:
+
+```bash
+docker-compose down
+```
+
+If you want me to also add a small `systemd` or `launchd` unit to auto-start the stack on a server, tell me your target OS and I will scaffold it.
+
 ## Summary of actions performed
 
 1. Located an unexpected Git repository at the workspace root (`/Users/debeerswang/Documents/Code/.git`). Backed it up:

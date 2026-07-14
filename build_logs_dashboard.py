@@ -143,7 +143,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
 <head>
   <meta charset=\"utf-8\" />
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
-  <title>Temperature Logs Dashboard</title>
+  <title>Temperature Logs Dashboard (Self-Hosted)</title>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -191,15 +191,15 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
 <body>
   <div class=\"wrap\">
     <section class=\"hero\">
-      <h1>Temperature Visit Logs Dashboard</h1>
-      <p>Combined and deduplicated insights from all JSON snapshots in the logs folder.</p>
+      <h1>Temperature Visit Logs Dashboard (Self-Hosted)</h1>
+      <p>Combined and deduplicated insights from local snapshots, with live refresh from your own logger service.</p>
     </section>
 
     <section class=\"controls\">
       <div class=\"control-grid\">
         <div class=\"control\">
           <label for=\"endpoint\">Admin endpoint</label>
-          <input id=\"endpoint\" value=\"https://temperature-visit-logger.onrender.com/admin/recent\" />
+          <input id=\"endpoint\" placeholder=\"http://localhost:8787/admin/recent\" />
         </div>
         <div class=\"control\">
           <label for=\"token\">ADMIN_TOKEN (for refresh)</label>
@@ -212,6 +212,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       </div>
       <div class=\"control-actions\">
         <button id=\"refreshBtn\" class=\"primary\">Refresh From Server</button>
+        <button id=\"localBtn\" class=\"secondary\">Use Local Logger</button>
         <button id=\"downloadBtn\" class=\"secondary\">Download Snapshot JSON</button>
         <button id=\"saveBtn\" class=\"secondary\">Save Snapshot To Folder</button>
       </div>
@@ -270,6 +271,35 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       filesProcessed: payload.summary?.filesProcessed || [],
       latestSnapshot: null,
     };
+
+    const LOCAL_ENDPOINT = 'http://localhost:8787/admin/recent';
+    const STORAGE_ENDPOINT_KEY = 'temperature.dashboard.adminEndpoint';
+    const STORAGE_LIMIT_KEY = 'temperature.dashboard.limit';
+
+    function normalizeAdminEndpoint(value) {
+      const trimmed = (value || '').trim();
+      if (!trimmed) return '';
+      if (trimmed.includes('/admin/recent')) return trimmed;
+      return `${trimmed.replace(/\/+$/, '')}/admin/recent`;
+    }
+
+    function inferDefaultEndpoint() {
+      const queryValue = new URLSearchParams(window.location.search).get('endpoint');
+      if (queryValue) return normalizeAdminEndpoint(queryValue);
+
+      const savedValue = localStorage.getItem(STORAGE_ENDPOINT_KEY);
+      if (savedValue) return normalizeAdminEndpoint(savedValue);
+
+      return LOCAL_ENDPOINT;
+    }
+
+    function initControls() {
+      document.getElementById('endpoint').value = inferDefaultEndpoint();
+      const savedLimit = localStorage.getItem(STORAGE_LIMIT_KEY);
+      if (savedLimit) {
+        document.getElementById('limit').value = savedLimit;
+      }
+    }
 
     function canonicalize(value) {
       if (Array.isArray(value)) {
@@ -547,7 +577,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
     }
 
     async function refreshFromServer() {
-      const endpoint = document.getElementById('endpoint').value.trim();
+      const endpoint = normalizeAdminEndpoint(document.getElementById('endpoint').value);
       const token = document.getElementById('token').value.trim();
       const limit = document.getElementById('limit').value.trim() || '200';
       const btn = document.getElementById('refreshBtn');
@@ -560,6 +590,8 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       btn.disabled = true;
       setStatus('Refreshing from server...');
       try {
+        localStorage.setItem(STORAGE_ENDPOINT_KEY, endpoint);
+        localStorage.setItem(STORAGE_LIMIT_KEY, limit);
         const url = `${endpoint}?limit=${encodeURIComponent(limit)}`;
         const resp = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` }
@@ -598,6 +630,10 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
     }
 
     document.getElementById('refreshBtn').addEventListener('click', refreshFromServer);
+    document.getElementById('localBtn').addEventListener('click', () => {
+      document.getElementById('endpoint').value = LOCAL_ENDPOINT;
+      setStatus('Endpoint set to local Docker logger.');
+    });
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const snapshot = state.latestSnapshot || { ok: true, count: state.events.length, events: state.events };
       const name = timestampName();
@@ -615,8 +651,9 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       }
     });
 
+    initControls();
     renderDashboard(payload.summary, state.events);
-    setStatus('Loaded local snapshots. Use Refresh From Server to repopulate JSON snapshots manually.');
+    setStatus('Loaded local snapshots. Use Refresh From Server with your self-hosted logger.');
   </script>
 </body>
 </html>
