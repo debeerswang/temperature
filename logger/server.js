@@ -91,6 +91,34 @@ function getProvidedAdminToken(req) {
   return typeof queryToken === 'string' ? queryToken.trim() : '';
 }
 
+function parseRecentLimit(rawLimit) {
+  const requestedLimit = Number.parseInt(String(rawLimit || '50'), 10);
+  return Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(requestedLimit, 1), 500)
+    : 50;
+}
+
+function isLocalAddress(ip) {
+  if (!ip) {
+    return false;
+  }
+  const normalized = String(ip).replace('::ffff:', '');
+  if (normalized === '::1' || normalized === '127.0.0.1') {
+    return true;
+  }
+  if (normalized.startsWith('10.') || normalized.startsWith('192.168.')) {
+    return true;
+  }
+  const parts = normalized.split('.').map((part) => Number.parseInt(part, 10));
+  if (parts.length === 4 && parts.every(Number.isFinite)) {
+    // RFC1918 172.16.0.0 - 172.31.255.255
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function readRecentEventsFromFile(limit) {
   if (!fs.existsSync(logFile)) {
     return [];
@@ -287,10 +315,32 @@ app.get('/admin/recent', async (req, res) => {
     return res.status(401).json({ ok: false, error: 'Unauthorized' });
   }
 
-  const requestedLimit = Number.parseInt(String(req.query.limit || '50'), 10);
-  const limit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(requestedLimit, 1), 500)
-    : 50;
+  const limit = parseRecentLimit(req.query.limit);
+
+  try {
+    const events = await readRecentEvents(limit);
+    res.json({ ok: true, count: events.length, events });
+  } catch {
+    res.status(500).json({ ok: false, error: 'Failed to read visit events' });
+  }
+});
+
+app.get('/dashboard/recent', async (req, res) => {
+  if (!adminToken) {
+    return res.status(503).json({ ok: false, error: 'ADMIN_TOKEN is not configured on server' });
+  }
+
+  const origin = req.headers.origin;
+  if (origin && !isOriginAllowed(origin)) {
+    return res.status(403).json({ ok: false, error: 'Origin not allowed' });
+  }
+
+  // If no browser origin header is provided, only allow local/LAN callers.
+  if (!origin && !isLocalAddress(getClientIp(req))) {
+    return res.status(403).json({ ok: false, error: 'Forbidden' });
+  }
+
+  const limit = parseRecentLimit(req.query.limit);
 
   try {
     const events = await readRecentEvents(limit);

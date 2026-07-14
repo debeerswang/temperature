@@ -199,11 +199,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       <div class=\"control-grid\">
         <div class=\"control\">
           <label for=\"endpoint\">Admin endpoint</label>
-          <input id=\"endpoint\" placeholder=\"http://localhost:8787/admin/recent\" />
-        </div>
-        <div class=\"control\">
-          <label for=\"token\">ADMIN_TOKEN (for refresh)</label>
-          <input id=\"token\" type=\"password\" placeholder=\"Enter token\" />
+          <input id=\"endpoint\" placeholder=\"http://localhost:8787/dashboard/recent\" />
         </div>
         <div class=\"control\">
           <label for=\"limit\">Limit</label>
@@ -272,15 +268,20 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
       latestSnapshot: null,
     };
 
-    const LOCAL_ENDPOINT = 'http://localhost:8787/admin/recent';
+    function localDashboardEndpoint() {
+      const host = window.location.hostname || 'localhost';
+      return `http://${host}:8787/dashboard/recent`;
+    }
+
+    const LOCAL_ENDPOINT = localDashboardEndpoint();
     const STORAGE_ENDPOINT_KEY = 'temperature.dashboard.adminEndpoint';
     const STORAGE_LIMIT_KEY = 'temperature.dashboard.limit';
 
     function normalizeAdminEndpoint(value) {
       const trimmed = (value || '').trim();
       if (!trimmed) return '';
-      if (trimmed.includes('/admin/recent')) return trimmed;
-      return `${trimmed.replace(/\/+$/, '')}/admin/recent`;
+      if (trimmed.includes('/dashboard/recent') || trimmed.includes('/admin/recent')) return trimmed;
+      return `${trimmed.replace(/\/+$/, '')}/dashboard/recent`;
     }
 
     function inferDefaultEndpoint() {
@@ -578,12 +579,11 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
 
     async function refreshFromServer() {
       const endpoint = normalizeAdminEndpoint(document.getElementById('endpoint').value);
-      const token = document.getElementById('token').value.trim();
       const limit = document.getElementById('limit').value.trim() || '200';
       const btn = document.getElementById('refreshBtn');
 
-      if (!endpoint || !token) {
-        setStatus('Endpoint and ADMIN_TOKEN are required to refresh.', true);
+      if (!endpoint) {
+        setStatus('Endpoint is required to refresh.', true);
         return;
       }
 
@@ -593,9 +593,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
         localStorage.setItem(STORAGE_ENDPOINT_KEY, endpoint);
         localStorage.setItem(STORAGE_LIMIT_KEY, limit);
         const url = `${endpoint}?limit=${encodeURIComponent(limit)}`;
-        const resp = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const resp = await fetch(url);
         if (!resp.ok) {
           const body = await resp.text();
           throw new Error(`HTTP ${resp.status}: ${body.slice(0, 180)}`);
@@ -653,7 +651,7 @@ def build_dashboard_html(summary: dict[str, Any], events: list[dict[str, Any]]) 
 
     initControls();
     renderDashboard(payload.summary, state.events);
-    setStatus('Loaded local snapshots. Use Refresh From Server with your self-hosted logger.');
+    setStatus('Loaded local snapshots. Use Refresh From Server with your self-hosted logger proxy endpoint.');
   </script>
 </body>
 </html>
