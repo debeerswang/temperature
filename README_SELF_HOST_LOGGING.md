@@ -173,3 +173,25 @@ docker-compose logs --tail=200 logger
 - Treat `ADMIN_TOKEN` as a secret.
 - Do not commit tokens into source control.
 - IP addresses are logged. If needed, reduce or redact IP collection in logger service.
+
+## Secret management (recommended)
+
+Use a local `.env` file for real secrets and commit only `.env.example`.
+
+1. Copy template:
+
+```bash
+cd ~/Documents/Code/Temperature
+cp .env.example .env
+```
+
+2. Edit `.env` and set real values, especially `ADMIN_TOKEN` and `POSTGRES_PASSWORD`.
+
+3. Start stack:
+
+```bash
+cd ~/Documents/Code/Temperature
+docker-compose up -d --build
+```
+
+This repository ignores `.env` via `.gitignore`, so tokens stay local and out of Git history.
