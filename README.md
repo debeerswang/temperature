@@ -132,10 +132,11 @@ This README documents the actions taken and commands used during the session.
 
 ## Current Logging Architecture
 
-- Frontend portal emits visit events to the Render logger endpoint.
+- Frontend portal emits visit events to the logger endpoint configured by `meta[name="visit-log-endpoint"]`.
 - Logger service runs from `logger/` and stores events in PostgreSQL when `DATABASE_URL` is configured.
 - If `DATABASE_URL` is absent, logger falls back to local JSONL file storage.
 - Admin endpoint for recent logs: `GET /admin/recent` (protected by `ADMIN_TOKEN`).
+- Dashboard refresh endpoint: `GET /dashboard/recent` (tokenless browser-facing proxy backed by server-side `ADMIN_TOKEN`).
 - Local dashboard instructions: [logs/README.md](logs/README.md)
 - Local dashboard timestamps are displayed in `America/Chicago`.
 - Event cards in the local dashboard expand every JSON field from each snapshot record.
@@ -147,14 +148,14 @@ If you prefer to run the logger on your own server instead of using Render, ther
 Recommended flow (from the repository root):
 
 ```bash
-# set an admin token first (use a long random string)
-export ADMIN_TOKEN="replace-with-a-long-random-secret"
+# create local env from template and set real values (one-time)
+cp .env.example .env
 docker-compose up -d --build
 ```
 
 Access the logger locally at `http://localhost:8787`. Health check: `http://localhost:8787/health`.
 
-The dashboard workflow (see `logs/README.md`) can fetch events from `http://localhost:8787/admin/recent` using the `ADMIN_TOKEN`.
+The dashboard workflow (see `logs/README.md`) can fetch events from `http://localhost:8787/dashboard/recent` without entering a token in the browser.
 
 Data persistence details:
 - PostgreSQL runs in Docker and stores data in a named volume `postgres_data`.

@@ -12,6 +12,7 @@ If `DATABASE_URL` is not set, the service falls back to local JSONL file logging
 - Persists each visit event to PostgreSQL when `DATABASE_URL` is configured
 - Falls back to appending JSON lines to `logger/data/visits.jsonl` for local-only usage
 - Exposes `GET /admin/recent` for viewing recent activity (requires `ADMIN_TOKEN`)
+- Exposes `GET /dashboard/recent` for dashboard refresh without browser token entry
 
 ## Start locally
 
@@ -49,13 +50,19 @@ curl http://localhost:8787/health
 # expected: {"ok":true}
 ```
 
-3. Fetch recent events using the admin endpoint (token required):
+3. Fetch recent events for the dashboard endpoint (no browser token required):
+
+```bash
+curl "http://localhost:8787/dashboard/recent?limit=50"
+```
+
+4. Fetch recent events using the admin endpoint (token required):
 
 ```bash
 curl "http://localhost:8787/admin/recent?token=${ADMIN_TOKEN}&limit=50"
 ```
 
-4. Data persistence:
+5. Data persistence:
 
 - Postgres data is stored in a Docker volume named `postgres_data` (created by `docker-compose`).
 - The logger also writes JSONL fallback files to `logger/data` on the host via a bind mount.
@@ -102,7 +109,8 @@ Allowed origins are controlled by `ALLOWED_ORIGINS`:
 ALLOWED_ORIGINS="https://debeerswang.github.io,http://localhost:3000" npm start
 ```
 
-The server also allows local development origins on `localhost` and `127.0.0.1` (any port), so the local dashboard refresh button can call `/admin/recent` from `http://localhost:8080` or `http://localhost:8081`.
+The server also allows local development origins on `localhost` and `127.0.0.1` (any port), so the local dashboard refresh button can call `/dashboard/recent` from `http://localhost:8080` or `http://localhost:8081`.
+For LAN access, add your dashboard origin to `ALLOWED_ORIGINS`, for example `http://10.0.0.74:8081`.
 
 ## View recent activity logs
 

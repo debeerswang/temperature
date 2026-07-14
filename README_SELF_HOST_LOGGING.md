@@ -14,7 +14,7 @@ This document explains how to run and operate the Temperature user activity logg
 2. Script sends visit activity to `/api/log-visit`.
 3. Logger stores events in PostgreSQL when `DATABASE_URL` is configured.
 4. If database is unavailable, logger can fall back to `logger/data/visits.jsonl`.
-5. Dashboard reads recent events through protected endpoint `/admin/recent`.
+5. Dashboard reads recent events through `/dashboard/recent`, which uses server-side `ADMIN_TOKEN`.
 
 ## Prerequisites
 
@@ -49,6 +49,7 @@ Expected response:
 - Health: `GET /health`
 - Write event: `POST /api/log-visit`
 - Write event (image/get fallback): `GET /api/log-visit`
+- Dashboard recent events (browser-safe): `GET /dashboard/recent`
 - Read recent events (admin): `GET /admin/recent`
 
 ### Admin auth
@@ -82,7 +83,6 @@ python3 -m http.server 8081
 3. In dashboard controls:
 
 - Click **Use Local Logger**
-- Enter `ADMIN_TOKEN`
 - Click **Refresh From Server**
 
 4. Export data as needed:
@@ -151,7 +151,7 @@ Fix:
 ### Unauthorized on `/admin/recent`
 
 - Confirm `ADMIN_TOKEN` is set in logger container environment.
-- Ensure dashboard token matches exactly.
+- Use `/dashboard/recent` for dashboard refresh instead of `/admin/recent`.
 
 ### No events appear
 
@@ -167,6 +167,12 @@ docker-compose logs --tail=200 logger
 
 - Ensure `ALLOWED_ORIGINS` includes your dashboard origin.
 - Localhost origins are supported for development.
+- For LAN access, include your server IP dashboard origin, such as `http://10.0.0.74:8081`.
+
+### Refresh works on localhost but fails from another computer
+
+- Ensure dashboard endpoint points to the server host IP (`http://<server-ip>:8787/dashboard/recent`), not `localhost`.
+- Confirm `ALLOWED_ORIGINS` includes `http://<server-ip>:8081`.
 
 ## Security notes
 

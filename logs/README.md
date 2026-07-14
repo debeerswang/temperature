@@ -4,7 +4,7 @@ This folder holds timestamped JSON snapshots exported from the Temperature visit
 
 ## Files
 
-- `recent_YYYYMMDD_HHMMSS.json` - timestamped exports from `/admin/recent`
+- `recent_YYYYMMDD_HHMMSS.json` - timestamped exports from `/dashboard/recent` (or `/admin/recent`)
 - `combined_dedup.json` - combined and deduplicated dataset used by the dashboard
 - `dashboard.html` - local portal for summaries, charts, and the full unique event list
 
@@ -38,7 +38,7 @@ http://localhost:8081/logs/dashboard.html
 
 Use the portal controls to fetch the latest server events, then save or download a new timestamped JSON snapshot:
 
-1. Enter the admin token.
+1. Click `Use Local Logger` (optional, sets endpoint to local logger host).
 2. Click `Refresh From Server`.
 3. Click `Download Snapshot JSON` or `Save Snapshot To Folder`.
 4. Re-run `python3 build_logs_dashboard.py` to merge the new file into the dashboard.
@@ -51,3 +51,4 @@ Use the portal controls to fetch the latest server events, then save or download
 - Each event card at the bottom expands every JSON field from the snapshot record.
 - Duplicate records are removed before rendering the combined view.
 - If the browser blocks the refresh call, make sure the logger service has been redeployed after the latest CORS update.
+- Dashboard refresh now uses `/dashboard/recent`, which does not require entering `ADMIN_TOKEN` in the browser.
